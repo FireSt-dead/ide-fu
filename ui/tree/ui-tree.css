@@ -1,0 +1,54 @@
+ui-tree {
+	overflow: auto;
+}
+ui-node {
+	font-family: "Verdana", Verdana, serif;
+	font-size: 11.5px;
+	line-height: 22px;
+	cursor: default;
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
+	display: block;
+}
+/*
+ui-node ui-node {
+	padding: 0px 0px 0px 20px;
+}
+*/
+ui-node:empty::shadow .toggle {
+	visibility: hidden;
+}
+ui-node::shadow #head {
+	white-space: nowrap;
+}
+ui-node[collapsed]::shadow svg {
+	transform: matrix(0.7, -0.6, 0.7, 0.6, -1.5, 0);
+}
+ui-node::shadow svg path {
+	fill: #999;
+	stroke: #000;
+}
+ui-node[collapsed]::shadow svg path {
+	fill: #EEE;
+	stroke: #999;
+}
+ui-node::shadow #head:hover {
+	color: orange;
+}
+ui-node::shadow #head:hover svg path {
+	fill: orange;
+}
+ui-node[collapsed]::shadow #content {
+	display: none;
+}
+
+ui-node[selected]::shadow #head {
+	background: #EEE;
+	color: green;
+}

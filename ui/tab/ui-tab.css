@@ -1,0 +1,33 @@
+ui-tabbar {
+	background: #FFF;
+	border-bottom: 1px solid #888;
+	
+	background: #EEE;
+
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: flex-end;
+}
+ui-tab {
+	cursor: default;
+	flex: 1 1 0%;
+	margin: 0px 0px -1px 0px;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;
+	color: gray;
+}
+ui-tab:hover {
+	color: orange;
+}
+ui-tab[selected] {
+	color: green;
+	border-left: 1px solid #888;
+	border-right: 1px solid #888;
+	background: #FFF;
+}
+ui-tab:first-of-type {
+	border-left: 0px;
+}
+ui-tab:last-of-type {
+	border-right: 0px;
+}

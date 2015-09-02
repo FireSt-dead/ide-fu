@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "noLib": true,
+        "noImplicitAny": true
+    },
+    "ide": {
+        "compileOnSave": true
+    },
+    "files": [
+        "node_modules/typescript/bin/lib.core.d.ts",
+        "chrome.d.ts",
+        
+        "typings/node/node.d.ts",
+        "typings/typescript/typescript.d.ts",
+        
+        "index.ts",
+        "ui/window/ui-window.ts",
+        "ui/buttons/ui-buttons.ts",
+        "ui/tab/ui-tab.ts",
+        "ui/tree/ui-tree.ts",
+        
+        "services/ts-lang.ts"
+    ]
+}

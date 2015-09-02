@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <template id="ui-check-box">  
+      <div style="display: flex; flex-flow: row nowrap;">
+        <svg width="18" height="18" style="flex: 0 0 20px;">
+          <rect class="box" x="2" y="2" width="14" height="14" />
+          <rect class="tick" x="5" y="5" width="8" height="8" />
+        </svg>
+        <content style="flex: 1;"></content>
+      </div>
+    </template>
+    <template id="ui-radio-button">  
+      <div style="display: flex; flex-flow: row nowrap;">
+        <svg width="18" height="18" style="flex: 0 0 20px;">
+          <circle class="box" cx="9" cy="9" r="7" />
+          <circle class="tick" cx="9" cy="9" r="4" />
+        </svg>
+        <content style="flex: 1;"></content>
+      </div>
+    </template>
+    <template id="ui-button">
+      <content></content>
+    </template>
+    <link rel="stylesheet" type="text/css" href="ui-buttons.css">
+    <script src="ui-buttons.js"></script>
+  </head>
+</html>

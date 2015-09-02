@@ -1,0 +1,168 @@
+<!doctype>
+<html class="app">
+<head>
+<title>My Application</title>
+<style>
+
+x-title {
+	flex: 0 0 auto;
+	display: flex; 
+	flex-flow: row nowrap;
+	height: 32px;
+	background: linear-gradient(to bottom, #EEE 0%, #DDD 100%);
+	-webkit-app-region: drag;
+	border-bottom: 1px solid gray;
+}
+
+x-resizer {
+	flex: 0 0 0px;
+	background: blue;
+	border-right: 1px solid gray;
+	cursor: e-resize;
+}
+
+</style>
+
+<link rel="stylesheet" href="./font-awesome-4.4.0/css/font-awesome.min.css">
+
+<script type="text/javascript" src="index.js"></script>
+
+<link rel="import" href="ui/window/ui-window.html">
+<link rel="import" href="ui/buttons/ui-buttons.html">
+<link rel="import" href="ui/tab/ui-tab.html">
+<link rel="import" href="ui/tree/ui-tree.html">
+
+<style>
+
+/* https://css-tricks.com/custom-scrollbars-in-webkit/ */
+::-webkit-scrollbar {
+	height: 8px;
+    width: 8px;
+	background: #EEE;
+}
+::-webkit-scrollbar:vertical {
+	border-left: 1px solid #CCC;
+}
+::-webkit-scrollbar:horizontal {
+	border-top: 1px solid #CCC;
+}
+::-webkit-scrollbar-thumb {
+    background: #AAA;
+}
+::-webkit-scrollbar-corner {
+	background: #CCC;
+}
+
+ui-node::shadow #title:before {
+	color: gray;
+	width: 18px;
+	
+	/* .fa */
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+ui-node::shadow #title:before {
+	/* .fa-folder-open */
+	content: "\f07c";
+	font-size: 14px;
+}
+ui-node[collapsed]::shadow #title:before {
+	/* .fa-folder */
+	content: "\f07b";
+	font-size: 14px;
+}
+ui-node:empty::shadow #title:before {
+	/* .fa-file-o */
+	content: "\f016";
+	font-size: 14px;
+}
+ui-node[extension=".html"]::shadow #title:before,
+ui-node[extension=".xml"]::shadow #title:before {
+	/* .fa-file-code-o */
+	content: "\f1c9";
+	font-size: 14px;
+}
+ui-node[extension=".css"]::shadow #title:before,
+ui-node[extension=".js"]::shadow #title:before,
+ui-node[extension=".json"]::shadow #title:before,
+ui-node[extension=".ts"]::shadow #title:before {
+	/* .fa-file-text-o */
+	content: "\f0f6";
+	font-size: 14px;
+}
+ui-node::shadow #head:hover #title::before {
+	color: darkorange;
+}
+ui-node[selected]::shadow #head #title:before {
+	color: darkgreen;
+}
+
+
+</style>
+
+</head>
+<body>
+<ui-window>
+	<x-ide style="flex: 1 1 0; display: flex; flex-flow: column nowrap; overflow: hidden;">
+		<x-title style="flex: 0 1 auto;">
+			<ui-button style="margin: 0px 2px; height: 20px; width: 20px;" tabindex="0">&gt;</ui-button>
+			<span title="android" class="fa fa-android fa-lg" style="color: #666; margin: 2px;"></span>
+			<span title="iOS" class="fa fa-apple" style="color: #999; margin: 2px;"></span>
+			<span title="windows" class="fa fa-windows" style="color: #999; margin: 2px;"></span>
+		</x-title>
+		<x-ide style="flex: 1 1 0; display: flex; flex-flow: row nowrap;">
+			<x-project style="flex: 0 0 250px; display: flex; flex-flow: column nowrap; overflow: hidden;">
+				<ui-tabbar style="flex: 0 1 auto; text-align: center;">
+					<ui-tab selected style="padding: 5px"><span class="fa fa-list fa-lg" style="margin: 3px 0px 0px 0px"></span><br/><span style="font-family: 'Verdana', Verdana, serif; font-size: 11.5px;">project</span></ui-tab>
+					<ui-tab style="padding: 5px"><span class="fa fa-check-circle-o fa-lg" style="margin: 3px 0px 0px 0px"></span><br/><span style="font-family: 'Verdana', Verdana, serif; font-size: 11.5px;">compile</span></ui-tab>
+					<ui-tab style="padding: 5px"><span class="fa fa-github-alt fa-lg" style="margin: 3px 0px 0px 0px"></span><br/><span style="font-family: 'Verdana', Verdana, serif; font-size: 11.5px;">git</span></ui-tab>
+					<ui-tab style="padding: 5px"><span class="fa fa-cogs fa-lg" style="margin: 3px 0px 0px 0px"></span><br/><span style="font-family: 'Verdana', Verdana, serif; font-size: 11.5px;">settings</span></ui-tab>
+				</ui-tabbar>
+				<ui-tree id="proj" style="flex: 1 1 0;">
+					<ui-node title="References"></ui-node>
+					<ui-node title="Src">
+						<ui-node title="Images">
+							<ui-node title="image1.png"></ui-node>
+							<ui-node title="image2.png"></ui-node>
+						</ui-node>
+						<ui-node title="Supporting">
+							<ui-node title="main.m"></ui-node>
+							<ui-node title="main.h"></ui-node>
+						</ui-node>
+					</ui-node>
+				</ui-tree>
+			</x-project>
+			<x-resizer left></x-resizer>
+			<x-editors style="flex: 1 0 0; display: flex; flex-flow: column nowrap; overflow: hidden;">
+				<code id="edit" style="flex: 1 1 0; overflow: auto; white-space: pre;">
+				</code>
+			</x-editors>
+			<x-resizer right></x-resizer>
+			<x-properties style="flex: 0 0 250px; display: flex; flex-flow: column nowrap; overflow: hidden;">
+				<ui-check-box tabindex="0">compile</ui-check-box>
+				<ui-check-box checked tabindex="0">transpile</ui-check-box>
+				<ui-check-box tabindex="0">do magic trick</ui-check-box>
+				<ui-check-box tabindex="0">sand box</ui-check-box>
+				<br>
+				<ui-radio-button tabindex="0">compile</ui-radio-button>
+				<ui-radio-button checked tabindex="0">transpile</ui-radio-button>
+				<ui-radio-button tabindex="0">do magic trick</ui-radio-button>
+				<ui-radio-button tabindex="0">sand box</ui-radio-button>
+				<br>
+				<div style="display: flex; flex-flow: row nowrap; height: 22px;">
+					<ui-button style="margin: 0px 2px; width: 80px;" tabindex="0">OK</ui-button><ui-button style="margin: 0px 2px; width: 80px;" tabindex="0">Cancel</ui-button>
+				</div>
+				</br>
+			</x-properties>
+		</x-ide>
+	<x-ide>
+</ui-window>
+</body>
+</html>
+
+
