@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "main": "index.html",
   "window": {
-    //"toolbar": false,
-    //"frame": false,
+    // To debug, comment these two out.
+    "toolbar": false,
+    "frame": false,
     "position": "center",
     "width": 1200,
     "height": 768,

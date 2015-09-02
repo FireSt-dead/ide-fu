@@ -18,7 +18,7 @@ try {
             txt += "</ui-node>";
         });
     };
-    traverse("C:\\Users\\FireSt\\Desktop\\template");
+    traverse("./");
     setTimeout(function () {
         document.getElementById("proj").innerHTML = txt;
     }, 1);
