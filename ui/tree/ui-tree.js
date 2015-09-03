@@ -53,6 +53,7 @@ var ui;
             _super.apply(this, arguments);
         }
         Node.prototype.createdCallback = function () {
+            var _this = this;
             var t = Node.document.getElementById('ui-node');
             var clone = document.importNode(t.content, true);
             var shadow = this.createShadowRoot();
@@ -72,21 +73,21 @@ var ui;
             }
             var headElement = shadow.querySelector("#head");
             headElement.style.padding = "0px 0px 0px " + (depth * 20) + "px";
-            this.addEventListener("click", function (e) {
-                console.log("Where: " + this);
-                if (this.childNodes.length > 0) {
-                    if (this.getAttribute('collapsed')) {
-                        this.removeAttribute('collapsed');
+            headElement.addEventListener("click", function (e) {
+                console.log("Where: " + _this);
+                if (_this.childNodes.length > 0) {
+                    if (_this.getAttribute('collapsed')) {
+                        _this.removeAttribute('collapsed');
                     }
                     else {
-                        this.setAttribute('collapsed', true);
+                        _this.setAttribute('collapsed', true);
                     }
                 }
                 else {
-                    var tree = this;
+                    var tree = _this;
                     while (tree) {
                         if (tree instanceof Tree) {
-                            tree.select(this);
+                            tree.select(_this);
                             break;
                         }
                         tree = tree.parentNode;

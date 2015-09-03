@@ -1,0 +1,93 @@
+ui-code {
+	display: flex;
+	flex-flow: column nowrap;
+	overflow: auto;
+}
+
+ui-block {
+	flex: 0 0 auto;
+	
+	display: flex;
+	flex-flow: column nowrap;
+}
+ui-block[collapsed] ui-block,
+ui-block[collapsed] ui-line {
+	display: none;
+}
+
+ui-block[collapsed] ui-line:first-of-type,
+ui-line {
+	flex: 0 0 auto;
+	
+	display: flex;
+	flex-flow: row nowrap;
+	
+	font-family: monospace;
+	font-size: 12px;
+	line-height: 18px;
+	font-weight: bold;
+}
+
+ui-block::shadow #expander {
+	border-right: 1px solid transparent;
+	background: transparent;
+	width: 6px;
+	margin: 0px 0px 0px 35px;
+}
+
+ui-block::shadow #expander:hover {
+	border-right: 1px solid green;
+	background: #CCC;
+}
+ui-code {
+	background: #FFF;
+	transition: background 0.1s;
+	transition-delay: 0.05s;
+}
+ui-code[collapsing] {
+	background: #DDD;
+	transition: background 0.2s;
+	transition-delay: 0.2s;
+}
+ui-block[collapsing] {
+	background: white;
+}
+
+ui-line::shadow #num {
+	color: gray;
+	width: 30px;
+	
+	padding: 0px 7px 0px 4px;
+	margin: 0px 15px 0px 0px;
+	text-align: right;
+	
+	/* unselectable */
+	-moz-user-select: none; 
+	-khtml-user-select: none; 
+	-webkit-user-select: none; 
+	-o-user-select: none; 
+}
+
+ui-block::shadow #toggle {
+	position: fixed;
+	z-index: 1;
+	top: 2px;
+	left: 6px;
+	margin: 0px -6px;
+}
+
+ui-block[collapsed]::shadow #toggle {
+	transform: matrix(0.7, -0.6, 0.7, 0.6, -1.5, 0);
+}
+ui-block::shadow #toggle path {
+	fill: #EEE;
+	stroke: #999;
+}
+ui-block[collapsed]::shadow #toggle path {
+	fill: #999;
+	stroke: #000;
+}
+
+ui-block::shadow #expander:hover #toggle path {
+	fill: orange;
+}

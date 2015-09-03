@@ -16,12 +16,19 @@ ui-node {
 
 	display: block;
 }
+
 /*
-ui-node ui-node {
-	padding: 0px 0px 0px 20px;
+ui-tree ui-node::shadow #toggle {
+	opacity: 0;
+	transition: opacity 0.5s;
+}
+ui-tree:hover ui-node::shadow #toggle {
+	opacity: 1;
+	transition: opacity 0.2s;
 }
 */
-ui-node:empty::shadow .toggle {
+
+ui-node:empty::shadow #toggle {
 	visibility: hidden;
 }
 ui-node::shadow #head {

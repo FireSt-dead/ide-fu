@@ -1,0 +1,36 @@
+<html>
+	<head>
+		<template id="ui-code">
+			<span style="flex: 1 0 auto; display: flex; flex-flow: row nowrap; align-items: stretch; position: relative;">
+				<span id="rule" style="background: #EEE; border-right: 1px solid #AAA; width: 41px; flex: 0 1 auto; position: absolute; top: 0px; bottom: 0px;">
+				</span>
+				<span style="display: flex; flex: 1 0 0; flex-flow: column nowrap; align-items: stretch; z-index: 1;">
+					<content></content>
+				</span>
+			</span>
+		</template>
+		<template id="ui-block">
+			<span style="display: flex; flex-flow: row nowrap; align-items: stretch; position: relative; ">
+				<span id="expander" style="flex: 0 1 auto; position: absolute; top: 0px; bottom: 0px; z-index: 1;">
+					<span style="background: transparent; position: absolute; top: 0px; bottom: 0px; width: 14px; left: 0px;"></span>
+					<svg id="toggle" width="12" height="12" style="position: absolute;">
+						<path d="M 2.5,9.5 L9.5,9.5 9.5,2.5 Z" />
+					</svg>
+				</span>
+				<span style="flex: 1 0 0;">
+					<content></content>
+				</span>
+			</span>
+		</template>
+		<template id="ui-line">
+			<span style="display: flex; flex-flow: row nowrap;">
+				<span id="num" style="flex: 0 1 auto;">5</span>
+				<span id="code" style="flex: 1 1 0;">
+					<content></content>
+				</span>
+			</span>
+		</template>
+		<link rel="stylesheet" type="text/css" href="ui-code.css">
+		<script src="ui-code.js"></script>
+	</head>
+</html>

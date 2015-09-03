@@ -46,6 +46,13 @@ function component(name) {
         return target;
     };
 }
+function parentOfType(node, type) {
+    var element = node;
+    while (element && !(element instanceof type)) {
+        element = element.parentNode;
+    }
+    return element;
+}
 // Some random UI drop:
 var resizerProto = Object.create(HTMLElement.prototype);
 resizerProto.createdCallback = function () {

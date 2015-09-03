@@ -21,6 +21,7 @@
         "ui/buttons/ui-buttons.ts",
         "ui/tab/ui-tab.ts",
         "ui/tree/ui-tree.ts",
+        "ui/code/ui-code.ts",
         
         "services/ts-lang.ts"
     ]

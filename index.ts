@@ -50,6 +50,14 @@ function component(name: string) {
 	}
 }
 
+function parentOfType(node: Node, type: any) {
+	var element = node;
+	while(element && !(element instanceof type)) {
+		element = element.parentNode;
+	}
+	return element;
+}
+
 // Some random UI drop:
 
 

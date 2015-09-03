@@ -49,8 +49,8 @@ module ui {
 			}
 			var headElement = shadow.querySelector("#head");
 			headElement.style.padding = "0px 0px 0px " + (depth * 20) + "px";
-					
-			this.addEventListener("click", function(e) {
+			
+			headElement.addEventListener("click", (e) => {
 				console.log("Where: " + this);
 				if (this.childNodes.length > 0) {
 					if (this.getAttribute('collapsed')) {

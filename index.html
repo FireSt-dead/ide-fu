@@ -31,6 +31,7 @@ x-resizer {
 <link rel="import" href="ui/buttons/ui-buttons.html">
 <link rel="import" href="ui/tab/ui-tab.html">
 <link rel="import" href="ui/tree/ui-tree.html">
+<link rel="import" href="ui/code/ui-code.html">
 
 <style>
 
@@ -139,8 +140,31 @@ ui-node[selected]::shadow #head #title:before {
 			</x-project>
 			<x-resizer left></x-resizer>
 			<x-editors style="flex: 1 0 0; display: flex; flex-flow: column nowrap; overflow: hidden;">
+				<!--
 				<code id="edit" style="flex: 1 1 0; overflow: auto; white-space: pre;">
 				</code>
+				-->
+				<ui-code style="flex: 1 1 0;">
+					<ui-line num="0">import fs from filesystem;</ui-line>
+					<ui-block>
+						<ui-line num="1">public class Point {</ui-line>
+						<ui-line num="2">&nbsp;&nbsp;&nbsp;&nbsp;var x: number;</ui-line>
+						<ui-line num="3">&nbsp;&nbsp;&nbsp;&nbsp;var y: number;</ui-line>
+						<ui-block>
+							<ui-line num="4">&nbsp;&nbsp;&nbsp;&nbsp;public add(other: Point): void {</ui-line>
+							<ui-line num="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.x += other.x;</ui-line>
+							<ui-line num="6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.y += other.y;</ui-line>
+							<ui-line num="7">&nbsp;&nbsp;&nbsp;&nbsp;}</ui-line>
+						</ui-block>
+						<ui-block>
+							<ui-line num="8">&nbsp;&nbsp;&nbsp;&nbsp;public remove(other: Point): void {</ui-line>
+							<ui-line num="9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.x -= other.x;</ui-line>
+							<ui-line num="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.y -= other.y;</ui-line>
+							<ui-line num="11">&nbsp;&nbsp;&nbsp;&nbsp;}</ui-line>
+						</ui-block>
+						<ui-line num="12">}</ui-line>
+					</ui-block>
+				</ui-code>
 			</x-editors>
 			<x-resizer right></x-resizer>
 			<x-properties style="flex: 0 0 250px; display: flex; flex-flow: column nowrap; overflow: hidden;">
