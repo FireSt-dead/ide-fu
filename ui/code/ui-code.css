@@ -49,8 +49,13 @@ ui-code[collapsing] {
 	transition: background 0.2s;
 	transition-delay: 0.2s;
 }
-ui-block[collapsing] {
+ui-block::shadow #codebg {
+	background: transparent;
+	transition: background 0.2s;
+}
+ui-block[collapsing]::shadow #codebg {
 	background: white;
+	transition: background 0.2s;
 }
 
 ui-line::shadow #num {
