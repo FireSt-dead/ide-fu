@@ -47,7 +47,7 @@ module ui {
   @component("ui-line")
   class Line extends HTMLElement {
     static document: Document = document.currentScript.ownerDocument;
-    createdCallback() {
+    createdCallback(): void {
       var root = this.createShadowRoot();
       var template = Line.document.getElementById("ui-line");
       var clone = document.importNode(template.content, true);
@@ -57,6 +57,13 @@ module ui {
 			var num = this.getAttribute('num');
 			var numElement = root.querySelector('#num');
 			numElement.innerHTML = num;
+    }
+    
+    attributeChangedCallback(name: string, oldValue: any, newValue: any): void {
+      if (name === "num") {
+        var numElement = this.shadowRoot.querySelector('#num');
+			  numElement.innerHTML = newValue;
+      }
     }
   }
 }

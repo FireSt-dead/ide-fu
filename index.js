@@ -29,13 +29,26 @@ catch (e) {
 document.addEventListener("DOMContentLoaded", function (e) {
     // alert("Load! " + document.getElementById("proj"));
     var proj = document.getElementById("proj");
-    var editor = document.getElementById("edit");
+    var editor = document.getElementById("code");
     proj.addEventListener("selection", function (e) {
         // TODO: Show in editor...
         var file = e.target.selectedNode.getAttribute("file");
-        editor.textContent = fs.readFileSync(file, 'utf8');
+        var content = fs.readFileSync(file, 'utf8');
+        // code-ify
+        editor.innerHTML = "";
+        // applyTextFormat(editor, content);
+        tsserv.createTsView(editor, content, document);
     });
 });
+// Formatters
+function applyTextFormat(host, text) {
+    text.split("\n").forEach(function (line, index) {
+        var lElem = document.createElement("ui-line");
+        lElem.setAttribute("num", index);
+        lElem.textContent = line;
+        host.appendChild(lElem);
+    });
+}
 // UI
 /**
  * Register the class as custom web element.

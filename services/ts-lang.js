@@ -7,6 +7,7 @@ function watch(rootFileNames, options) {
     var files = {};
     // initialize the list of files
     rootFileNames.forEach(function (fileName) {
+        console.log("ts: " + fileName);
         files[fileName] = { version: 0 };
     });
     // Create the language service host to allow the LS to communicate with the host
@@ -24,7 +25,7 @@ function watch(rootFileNames, options) {
         getDefaultLibFileName: function (options) { return ts.getDefaultLibFilePath(options); },
     };
     // Create the language service files
-    var services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
+    var languageService = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
     // Now let's watch the files
     rootFileNames.forEach(function (fileName) {
         console.log("Watch file: " + fileName);
@@ -44,7 +45,7 @@ function watch(rootFileNames, options) {
         });
     });
     function emitFile(fileName) {
-        var output = services.getEmitOutput(fileName);
+        var output = languageService.getEmitOutput(fileName);
         if (!output.emitSkipped) {
             console.log("Emitting " + fileName);
         }
@@ -57,9 +58,9 @@ function watch(rootFileNames, options) {
         });
     }
     function logErrors(fileName) {
-        var allDiagnostics = services.getCompilerOptionsDiagnostics()
-            .concat(services.getSyntacticDiagnostics(fileName))
-            .concat(services.getSemanticDiagnostics(fileName));
+        var allDiagnostics = languageService.getCompilerOptionsDiagnostics()
+            .concat(languageService.getSyntacticDiagnostics(fileName))
+            .concat(languageService.getSemanticDiagnostics(fileName));
         allDiagnostics.forEach(function (diagnostic) {
             var message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
             if (diagnostic.file) {
@@ -71,6 +72,28 @@ function watch(rootFileNames, options) {
             }
         });
     }
+    exports.createTsView = function (host, content, document) {
+        // function createClassifier(host: Logger): Classifier;
+        var lines = content.split("\n");
+        var classifier = ts.createClassifier({ log: function (s) { return console.log("Log: " + s); } });
+        var finalLexState = 0 /* Start */;
+        lines.forEach(function (line, index) {
+            var result = classifier.getClassificationsForLine(line, finalLexState, true);
+            finalLexState = result.finalLexState;
+            var lElem = document.createElement("ui-line");
+            lElem.setAttribute("num", index);
+            host.appendChild(lElem);
+            var start = 0;
+            result.entries.forEach(function (token) {
+                var end = start + token.length;
+                var tElem = document.createElement("span");
+                tElem.setAttribute("class", ts.TokenClass[token.classification].toLowerCase());
+                tElem.textContent = line.substr(start, token.length);
+                lElem.appendChild(tElem);
+                start = end;
+            });
+        });
+    };
 }
 // Initialize files constituting the program as all .ts files in the current directory
 var currentDirectoryFiles = fs.readdirSync(process.cwd()).

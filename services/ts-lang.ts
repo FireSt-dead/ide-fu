@@ -11,6 +11,7 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
 
     // initialize the list of files
     rootFileNames.forEach(fileName => {
+        console.log("ts: " + fileName);
         files[fileName] = { version: 0 };
     });
 
@@ -31,7 +32,7 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
     };
 
     // Create the language service files
-    const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
+    const languageService = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
 
     // Now let's watch the files
     rootFileNames.forEach(fileName => {
@@ -58,7 +59,7 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
     });
 
     function emitFile(fileName: string) {
-        let output = services.getEmitOutput(fileName);
+        let output = languageService.getEmitOutput(fileName);
 
         if (!output.emitSkipped) {
             console.log(`Emitting ${fileName}`);
@@ -74,9 +75,9 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
     }
 
     function logErrors(fileName: string) {
-        let allDiagnostics = services.getCompilerOptionsDiagnostics()
-            .concat(services.getSyntacticDiagnostics(fileName))
-            .concat(services.getSemanticDiagnostics(fileName));
+        let allDiagnostics = languageService.getCompilerOptionsDiagnostics()
+            .concat(languageService.getSyntacticDiagnostics(fileName))
+            .concat(languageService.getSemanticDiagnostics(fileName));
 
         allDiagnostics.forEach(diagnostic => {
             let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
@@ -87,6 +88,34 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
             else {
                 console.log(`  Error: ${message}`);
             }
+        });
+    }
+    
+    exports.createTsView = function(host, content: string, document: any) {
+        // function createClassifier(host: Logger): Classifier;
+        var lines: string[] = content.split("\n");
+        var classifier = ts.createClassifier({ log: s => console.log("Log: " + s) });
+
+        var finalLexState = ts.EndOfLineState.Start;
+        lines.forEach((line, index) => {
+            var result = classifier.getClassificationsForLine(line, finalLexState, true);
+            finalLexState = result.finalLexState;
+            
+            var lElem = document.createElement("ui-line");
+            lElem.setAttribute("num", index);
+            host.appendChild(lElem);
+            
+            var start = 0;
+            result.entries.forEach(token => {
+                var end = start + token.length;
+
+                var tElem = document.createElement("span");
+                tElem.setAttribute("class", ts.TokenClass[token.classification].toLowerCase());
+                tElem.textContent = line.substr(start, token.length);
+                lElem.appendChild(tElem);
+                
+                start = end;
+            });
         });
     }
 }

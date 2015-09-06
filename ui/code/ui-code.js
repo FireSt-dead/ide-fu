@@ -85,6 +85,12 @@ var ui;
             var numElement = root.querySelector('#num');
             numElement.innerHTML = num;
         };
+        Line.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+            if (name === "num") {
+                var numElement = this.shadowRoot.querySelector('#num');
+                numElement.innerHTML = newValue;
+            }
+        };
         Line.document = document.currentScript.ownerDocument;
         Line = __decorate([
             component("ui-line")

@@ -28,6 +28,11 @@ ui-line {
 	font-weight: bold;
 }
 
+ui-line::shadow #code {
+	white-space: pre-wrap;
+	tab-size: 4;
+}
+
 ui-block::shadow #expander {
 	border-right: 1px solid transparent;
 	background: transparent;
@@ -56,6 +61,11 @@ ui-block::shadow #codebg {
 ui-block[collapsing]::shadow #codebg {
 	background: white;
 	transition: background 0.2s;
+	border-radius: 10px;
+	left: 45px;
+	right: 2px;
+	top: -2px;
+	bottom: -2px;
 }
 
 ui-line::shadow #num {
@@ -84,6 +94,12 @@ ui-block::shadow #toggle {
 ui-block[collapsed]::shadow #toggle {
 	transform: matrix(0.7, -0.6, 0.7, 0.6, -1.5, 0);
 }
+ui-block[collapsed] ui-line:first-of-type::shadow #code:after {
+	content: "...}";
+	color: #AAA;
+	font-weight: bold;
+	border-radius: 4px;
+}
 ui-block::shadow #toggle path {
 	fill: #EEE;
 	stroke: #999;
@@ -95,4 +111,34 @@ ui-block[collapsed]::shadow #toggle path {
 
 ui-block::shadow #expander:hover #toggle path {
 	fill: orange;
+}
+
+
+/* TS specific... */	
+ui-code .punctuation {
+	color: black;
+}
+ui-code .keyword {
+	color: blue;
+}
+ui-code .operator {
+	color: black;
+}
+ui-code .comment {
+	color: darkgreen;
+}
+ui-code .whitespace {
+	color: black;
+}
+ui-code .identifier {
+	color: black;
+}
+ui-code .numberliteral {
+	color: darkcyan;
+}
+ui-code .stringliteral {
+	color: darkred;
+}
+ui-code .regexpliteral {
+	color: darkorange;
 }

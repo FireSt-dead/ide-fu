@@ -18,7 +18,7 @@
 					</svg>
 				</span>
 				<span style="flex: 1 0 0; position: relative;">
-					<span id="codebg" style="position: absolute; left: 45px; right: 2px; top: -2px; bottom: -2px; border-radius: 10px; z-index: -1;">
+					<span id="codebg" style="position: absolute; z-index: -1;">
 					</span>
 					<content></content>
 				</span>
@@ -27,9 +27,7 @@
 		<template id="ui-line">
 			<span style="display: flex; flex-flow: row nowrap;">
 				<span id="num" style="flex: 0 1 auto;">5</span>
-				<span id="code" style="flex: 1 1 0;">
-					<content></content>
-				</span>
+				<span id="code" style="flex: 1 1 0;"><content></content></span>
 			</span>
 		</template>
 		<link rel="stylesheet" type="text/css" href="ui-code.css">
