@@ -111,7 +111,10 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
 
                 var tElem = document.createElement("span");
                 tElem.setAttribute("class", ts.TokenClass[token.classification].toLowerCase());
-                tElem.textContent = line.substr(start, token.length);
+                var tokenText = line.substr(start, token.length);
+                
+                // console.log("Line: '" + tokenText + "' " + token.length + " " + (tokenText == "\r"));
+                tElem.textContent = tokenText;
                 lElem.appendChild(tElem);
                 
                 start = end;
