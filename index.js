@@ -84,3 +84,4 @@ resizerProto.createdCallback = function () {
     }
 };
 var resizer = document.registerElement('x-resizer', { prototype: resizerProto });
+//# sourceMappingURL=index.js.map

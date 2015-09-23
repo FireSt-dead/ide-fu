@@ -2,25 +2,30 @@ module ui {
   @component("ui-code")
   class Code extends HTMLElement {
     static document: Document = document.currentScript.ownerDocument;
+    
+    range: any;
+    underlay: any;
+    context: any;
+    
     createdCallback() {
       var root = this.createShadowRoot();
       var template = Code.document.getElementById("ui-code");
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
       
-      var underlay = this.shadowRoot.getElementById("underlay");
-      var context = underlay.getContext('2d');
+      this.underlay = this.shadowRoot.getElementById("underlay");
+      this.context = this.underlay.getContext('2d');
       
-      var range = document.createRange();
+      this.range = document.createRange();
       var anchor;
       
       var isDragSelecting = false;
       
       var reposition = e => {
-        underlay.style.top = this.scrollTop;
-        underlay.style.left = this.scrollLeft;
-        underlay.width = this.clientWidth;
-        underlay.height = this.clientHeight;
+        this.underlay.style.top = this.scrollTop;
+        this.underlay.style.left = this.scrollLeft;
+        this.underlay.width = this.clientWidth;
+        this.underlay.height = this.clientHeight;
       }
       
       this.addEventListener("scroll", reposition);
@@ -28,26 +33,43 @@ module ui {
       
       this.addEventListener("mousedown", e => {
         anchor = document.caretRangeFromPoint(e.clientX, e.clientY);
-        range.setStart(anchor.startContainer, anchor.startOffset);
-        range.setEnd(anchor.endContainer, anchor.endOffset);
+        this.range.setStart(anchor.startContainer, anchor.startOffset);
+        this.range.setEnd(anchor.endContainer, anchor.endOffset);
         isDragSelecting = true;
+        
+        this.reselect();
       });
       
       this.addEventListener("mousemove", e => {
         if (!isDragSelecting)
           return;
-        // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
+         // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
         var current = document.caretRangeFromPoint(e.clientX, e.clientY);
         // TODO: Or swap if selecting backwards!
         var cmp = anchor.compareBoundaryPoints(Range.START_TO_START, current);
         if (cmp <= 0) {
-          range.setStart(anchor.startContainer, anchor.startOffset);
-          range.setEnd(current.endContainer, current.endOffset);
+          this.range.setStart(anchor.startContainer, anchor.startOffset);
+          this.range.setEnd(current.endContainer, current.endOffset);
         } else {
-          range.setStart(current.endContainer, current.endOffset);
-          range.setEnd(anchor.startContainer, anchor.startOffset);
+          this.range.setStart(current.endContainer, current.endOffset);
+          this.range.setEnd(anchor.startContainer, anchor.startOffset);
         }
         
+        this.reselect();
+      });
+      
+      this.addEventListener("mouseup", e => {
+        // console.log("Mouse up! " + e.clientX + " " + e.clientY);
+        isDragSelecting = false;
+      });
+      
+      this.addEventListener("click", e => {
+        // Set carret on the clicked point.
+        
+      });
+    }
+    
+    reselect() {        
         var lines = [];
         function readLines(elem: Element) {
           for(var i = 0; i < elem.childNodes.length; i++) {
@@ -65,26 +87,26 @@ module ui {
         var lineRange = document.createRange();
         for (var i = 0; i < lines.length; i++) {
           var line = lines[i];
-          if (range.intersectsNode(line)) {
+          if (this.range.intersectsNode(line)) {
             console.log("Intersects: " + line);
             
             lineRange.setStartBefore(line.firstChild);
             lineRange.setEndAfter(line.lastChild);
             
-            if (lineRange.compareBoundaryPoints(Range.START_TO_START, range) < 0) {
-              lineRange.setStart(range.startContainer, range.startOffset);
+            if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.range) < 0) {
+              lineRange.setStart(this.range.startContainer, this.range.startOffset);
             }
-            if (lineRange.compareBoundaryPoints(Range.END_TO_END, range) > 0) {
-              lineRange.setEnd(range.endContainer, range.endOffset);
+            if (lineRange.compareBoundaryPoints(Range.END_TO_END, this.range) > 0) {
+              lineRange.setEnd(this.range.endContainer, this.range.endOffset);
             }
             
             var ranges = lineRange.getClientRects();
             
             var lineRect = {
-              left: ranges[0].left - 1,
-              top: ranges[0].top - 1,
-              right: ranges[ranges.length - 1].right + 1,
-              bottom: ranges[ranges.length - 1].bottom + 1
+              left: ranges[0].left,
+              top: ranges[0].top,
+              right: ranges[ranges.length - 1].right,
+              bottom: ranges[ranges.length - 1].bottom
             };
             lineRect.width = lineRect.right - lineRect.left;
             lineRect.height = lineRect.bottom - lineRect.top;
@@ -92,23 +114,23 @@ module ui {
           }
         }
         
-        context.fillStyle = "#DDDDDD";
-        context.fillRect(0, 0, underlay.width, underlay.height);
+        // this.context.fillStyle = "#DDDDDD";
+        this.context.clearRect(0, 0, this.underlay.width, this.underlay.height);
         
-        context.strokeStyle = "#999999";
-        context.lineWidth = 1;
-        context.fillStyle = "#FFFFFF";
+        this.context.strokeStyle = "#002266";
+        this.context.lineWidth = 1;
+        this.context.fillStyle = "#AACCEE";
         
-        var cRect = underlay.getBoundingClientRect();
+        var cRect = this.underlay.getBoundingClientRect();
         
         for (var i = 0; i < lineRects.length; i++) {
           var rect = lineRects[i];
-          context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
+          this.context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
         }
         
         for (var i = 0; i < lineRects.length; i++) {
           var rect = lineRects[i];
-          context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
+          this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
         }
         
         /*
@@ -123,18 +145,7 @@ module ui {
           context.strokeRect(Math.floor(rect.left) - 0.5 - cRect.left, Math.floor(rect.top) - 0.5 - cRect.top, Math.ceil(rect.width), Math.ceil(rect.height));
         }
         */
-      });
-      
-      this.addEventListener("mouseup", e => {
-        // console.log("Mouse up! " + e.clientX + " " + e.clientY);
-        isDragSelecting = false;
-      });
-      
-      this.addEventListener("click", e => {
-        // Set carret on the clicked point.
-        
-      });
-    }
+      }
   }
   
   @component("ui-block")
