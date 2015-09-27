@@ -43,7 +43,7 @@ module ui {
       this.addEventListener("mousemove", e => {
         if (!isDragSelecting)
           return;
-         // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
+        // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
         var current = document.caretRangeFromPoint(e.clientX, e.clientY);
         // TODO: Or swap if selecting backwards!
         var cmp = anchor.compareBoundaryPoints(Range.START_TO_START, current);
@@ -59,17 +59,22 @@ module ui {
       });
       
       this.addEventListener("mouseup", e => {
-        // console.log("Mouse up! " + e.clientX + " " + e.clientY);
         isDragSelecting = false;
       });
       
-      this.addEventListener("click", e => {
-        // Set carret on the clicked point.
-        
+      document.addEventListener("keypress", e => {
+        var c = String.fromCharCode(e.which);
+        // console.log("Key press: " + txt);
+        this.range.deleteContents();
+        var node = document.createTextNode(c);
+        this.range.insertNode(node);
+        this.range.setStart(node, 1);
+        this.range.setEnd(node, 1);
+        this.reselect();
       });
     }
     
-    reselect() {        
+    reselect() {
         var lines = [];
         function readLines(elem: Element) {
           for(var i = 0; i < elem.childNodes.length; i++) {
@@ -101,12 +106,13 @@ module ui {
             }
             
             var ranges = lineRange.getClientRects();
+            console.dir(ranges);
             
             var lineRect = {
-              left: ranges[0].left,
+              left: ranges[0].left + 1,
               top: ranges[0].top,
               right: ranges[ranges.length - 1].right,
-              bottom: ranges[ranges.length - 1].bottom
+              bottom: ranges[ranges.length - 1].bottom - 1
             };
             lineRect.width = lineRect.right - lineRect.left;
             lineRect.height = lineRect.bottom - lineRect.top;

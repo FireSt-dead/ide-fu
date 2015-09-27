@@ -63,11 +63,17 @@ var ui;
                 _this.reselect();
             });
             this.addEventListener("mouseup", function (e) {
-                // console.log("Mouse up! " + e.clientX + " " + e.clientY);
                 isDragSelecting = false;
             });
-            this.addEventListener("click", function (e) {
-                // Set carret on the clicked point.
+            document.addEventListener("keypress", function (e) {
+                var c = String.fromCharCode(e.which);
+                // console.log("Key press: " + txt);
+                _this.range.deleteContents();
+                var node = document.createTextNode(c);
+                _this.range.insertNode(node);
+                _this.range.setStart(node, 1);
+                _this.range.setEnd(node, 1);
+                _this.reselect();
             });
         };
         Code.prototype.reselect = function () {
@@ -99,11 +105,12 @@ var ui;
                         lineRange.setEnd(this.range.endContainer, this.range.endOffset);
                     }
                     var ranges = lineRange.getClientRects();
+                    console.dir(ranges);
                     var lineRect = {
-                        left: ranges[0].left,
+                        left: ranges[0].left + 1,
                         top: ranges[0].top,
                         right: ranges[ranges.length - 1].right,
-                        bottom: ranges[ranges.length - 1].bottom
+                        bottom: ranges[ranges.length - 1].bottom - 1
                     };
                     lineRect.width = lineRect.right - lineRect.left;
                     lineRect.height = lineRect.bottom - lineRect.top;
