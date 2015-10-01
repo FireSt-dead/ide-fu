@@ -3,9 +3,13 @@ module ui {
   class Code extends HTMLElement {
     static document: Document = document.currentScript.ownerDocument;
     
-    range: any;
-    underlay: any;
+    underlayElem: any;
     context: any;
+    caretElem: any;
+    
+    selectionRange: any;
+    caretRange: any;
+    anchorRange: any;
     
     createdCallback() {
       var root = this.createShadowRoot();
@@ -13,49 +17,44 @@ module ui {
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
       
-      this.underlay = this.shadowRoot.getElementById("underlay");
-      this.context = this.underlay.getContext('2d');
+      this.underlayElem = this.shadowRoot.getElementById("underlay");
+      this.context = this.underlayElem.getContext('2d');
+      this.caretElem = this.shadowRoot.getElementById("caret");
       
-      this.range = document.createRange();
-      var anchor;
+      this.selectionRange = document.createRange();
       
       var isDragSelecting = false;
       
-      var reposition = e => {
-        this.underlay.style.top = this.scrollTop;
-        this.underlay.style.left = this.scrollLeft;
-        this.underlay.width = this.clientWidth;
-        this.underlay.height = this.clientHeight;
-      }
-      
-      this.addEventListener("scroll", reposition);
-      this.addEventListener("onresize", reposition);
+      this.addEventListener("scroll", e => this.onResize());
+      this.addEventListener("resize", e => this.onResize());
       
       this.addEventListener("mousedown", e => {
-        anchor = document.caretRangeFromPoint(e.clientX, e.clientY);
-        this.range.setStart(anchor.startContainer, anchor.startOffset);
-        this.range.setEnd(anchor.endContainer, anchor.endOffset);
+        this.anchorRange = this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+        this.redrawCaret();
+        this.selectionRange.setStart(this.anchorRange.startContainer, this.anchorRange.startOffset);
+        this.selectionRange.setEnd(this.anchorRange.endContainer, this.anchorRange.endOffset);
         isDragSelecting = true;
         
-        this.reselect();
+        this.redrawSelection();
       });
       
       this.addEventListener("mousemove", e => {
         if (!isDragSelecting)
           return;
-        // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
-        var current = document.caretRangeFromPoint(e.clientX, e.clientY);
-        // TODO: Or swap if selecting backwards!
-        var cmp = anchor.compareBoundaryPoints(Range.START_TO_START, current);
+        
+        this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+        this.redrawCaret();
+        
+        var cmp = this.anchorRange.compareBoundaryPoints(Range.START_TO_START, this.caretRange);
         if (cmp <= 0) {
-          this.range.setStart(anchor.startContainer, anchor.startOffset);
-          this.range.setEnd(current.endContainer, current.endOffset);
+          this.selectionRange.setStart(this.anchorRange.startContainer, this.anchorRange.startOffset);
+          this.selectionRange.setEnd(this.caretRange.endContainer, this.caretRange.endOffset);
         } else {
-          this.range.setStart(current.endContainer, current.endOffset);
-          this.range.setEnd(anchor.startContainer, anchor.startOffset);
+          this.selectionRange.setStart(this.caretRange.endContainer, this.caretRange.endOffset);
+          this.selectionRange.setEnd(this.anchorRange.startContainer, this.anchorRange.startOffset);
         }
         
-        this.reselect();
+        this.redrawSelection();
       });
       
       this.addEventListener("mouseup", e => {
@@ -65,16 +64,46 @@ module ui {
       document.addEventListener("keypress", e => {
         var c = String.fromCharCode(e.which);
         // console.log("Key press: " + txt);
-        this.range.deleteContents();
+        this.selectionRange.deleteContents();
         var node = document.createTextNode(c);
-        this.range.insertNode(node);
-        this.range.setStart(node, 1);
-        this.range.setEnd(node, 1);
-        this.reselect();
+        this.selectionRange.insertNode(node);
+        this.selectionRange.setStart(node, 1);
+        this.caretRange.setEnd(node, 1);
+        this.caretRange.setStart(node, 1);
+        this.selectionRange.setEnd(node, 1);
+        this.redrawSelection();
+        this.redrawCaret();
       });
     }
     
-    reselect() {
+    onResize() {
+        this.underlayElem.style.top = this.scrollTop;
+        this.underlayElem.style.left = this.scrollLeft;
+        this.underlayElem.width = this.clientWidth;
+        this.underlayElem.height = this.clientHeight;
+    }
+    
+    redrawCaret() {
+        var rects = this.caretRange.getClientRects();
+        if (rects.length > 0) {
+          var rect = rects[0];
+          var cRect = this.underlayElem.getBoundingClientRect();
+          this.caretElem.style.top = rect.top - cRect.top;
+          this.caretElem.style.left = rect.left - cRect.left - 1;
+          this.caretElem.style.height = rect.height;
+          this.caretElem.style.width = 2;
+        }
+    }
+      
+    redrawSelection() {
+      
+        this.onResize();
+        this.context.clearRect(0, 0, this.underlayElem.width, this.underlayElem.height);
+        
+        if (this.selectionRange.collapsed) {
+          return;
+        }
+      
         var lines = [];
         function readLines(elem: Element) {
           for(var i = 0; i < elem.childNodes.length; i++) {
@@ -92,21 +121,20 @@ module ui {
         var lineRange = document.createRange();
         for (var i = 0; i < lines.length; i++) {
           var line = lines[i];
-          if (this.range.intersectsNode(line)) {
+          if (this.selectionRange.intersectsNode(line)) {
             console.log("Intersects: " + line);
             
             lineRange.setStartBefore(line.firstChild);
             lineRange.setEndAfter(line.lastChild);
             
-            if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.range) < 0) {
-              lineRange.setStart(this.range.startContainer, this.range.startOffset);
+            if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.selectionRange) < 0) {
+              lineRange.setStart(this.selectionRange.startContainer, this.selectionRange.startOffset);
             }
-            if (lineRange.compareBoundaryPoints(Range.END_TO_END, this.range) > 0) {
-              lineRange.setEnd(this.range.endContainer, this.range.endOffset);
+            if (lineRange.compareBoundaryPoints(Range.END_TO_END, this.selectionRange) > 0) {
+              lineRange.setEnd(this.selectionRange.endContainer, this.selectionRange.endOffset);
             }
             
             var ranges = lineRange.getClientRects();
-            console.dir(ranges);
             
             var lineRect = {
               left: ranges[0].left + 1,
@@ -120,14 +148,11 @@ module ui {
           }
         }
         
-        // this.context.fillStyle = "#DDDDDD";
-        this.context.clearRect(0, 0, this.underlay.width, this.underlay.height);
-        
         this.context.strokeStyle = "#002266";
         this.context.lineWidth = 1;
         this.context.fillStyle = "#AACCEE";
         
-        var cRect = this.underlay.getBoundingClientRect();
+        var cRect = this.underlayElem.getBoundingClientRect();
         
         for (var i = 0; i < lineRects.length; i++) {
           var rect = lineRects[i];
@@ -138,19 +163,6 @@ module ui {
           var rect = lineRects[i];
           this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
         }
-        
-        /*
-        var cRect = underlay.getBoundingClientRect();
-        
-        var rects = range.getClientRects();
-        context.clearRect(0, 0, underlay.width, underlay.height);
-        context.strokeStyle = "red";
-        
-        for (var i = 0; i < rects.length; i++) {
-          var rect = rects[i];
-          context.strokeRect(Math.floor(rect.left) - 0.5 - cRect.left, Math.floor(rect.top) - 0.5 - cRect.top, Math.ceil(rect.width), Math.ceil(rect.height));
-        }
-        */
       }
   }
   

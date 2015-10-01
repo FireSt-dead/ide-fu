@@ -1,8 +1,20 @@
 <html>
 	<head>
 		<template id="ui-code">
+			<style>
+				@-webkit-keyframes example {
+					0% {background-color: black;}
+					40% {background-color: black;}
+					60% {background-color: transparent;}
+					100% {background-color: transparent;}
+				}
+				#caret {
+					-webkit-animation: example 1s infinite; /* Chrome, Safari, Opera */
+				}
+			</style>
 			<span style="flex: 1 0 auto; display: flex; flex-flow: row nowrap; align-items: stretch; position: relative;">
 				<canvas id="underlay" style="position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px;"></canvas>
+				<div id="caret" style="width: 2px; position: absolute;"></div>
 				<span id="rule" style="background: #EEE; border-right: 1px solid #AAA; width: 41px; flex: 0 1 auto; position: absolute; top: 0px; bottom: 0px;">
 				</span>
 				<span style="display: flex; flex: 1 0 0; flex-flow: column nowrap; align-items: stretch; z-index: 1;">

@@ -25,42 +25,36 @@ var ui;
             var template = Code.document.getElementById("ui-code");
             var clone = document.importNode(template.content, true);
             root.appendChild(clone);
-            this.underlay = this.shadowRoot.getElementById("underlay");
-            this.context = this.underlay.getContext('2d');
-            this.range = document.createRange();
-            var anchor;
+            this.underlayElem = this.shadowRoot.getElementById("underlay");
+            this.context = this.underlayElem.getContext('2d');
+            this.caretElem = this.shadowRoot.getElementById("caret");
+            this.selectionRange = document.createRange();
             var isDragSelecting = false;
-            var reposition = function (e) {
-                _this.underlay.style.top = _this.scrollTop;
-                _this.underlay.style.left = _this.scrollLeft;
-                _this.underlay.width = _this.clientWidth;
-                _this.underlay.height = _this.clientHeight;
-            };
-            this.addEventListener("scroll", reposition);
-            this.addEventListener("onresize", reposition);
+            this.addEventListener("scroll", function (e) { return _this.onResize(); });
+            this.addEventListener("resize", function (e) { return _this.onResize(); });
             this.addEventListener("mousedown", function (e) {
-                anchor = document.caretRangeFromPoint(e.clientX, e.clientY);
-                _this.range.setStart(anchor.startContainer, anchor.startOffset);
-                _this.range.setEnd(anchor.endContainer, anchor.endOffset);
+                _this.anchorRange = _this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+                _this.redrawCaret();
+                _this.selectionRange.setStart(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
+                _this.selectionRange.setEnd(_this.anchorRange.endContainer, _this.anchorRange.endOffset);
                 isDragSelecting = true;
-                _this.reselect();
+                _this.redrawSelection();
             });
             this.addEventListener("mousemove", function (e) {
                 if (!isDragSelecting)
                     return;
-                // console.log("Mouse move! " + e.clientX + " " + e.clientY + " - " + range);
-                var current = document.caretRangeFromPoint(e.clientX, e.clientY);
-                // TODO: Or swap if selecting backwards!
-                var cmp = anchor.compareBoundaryPoints(Range.START_TO_START, current);
+                _this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+                _this.redrawCaret();
+                var cmp = _this.anchorRange.compareBoundaryPoints(Range.START_TO_START, _this.caretRange);
                 if (cmp <= 0) {
-                    _this.range.setStart(anchor.startContainer, anchor.startOffset);
-                    _this.range.setEnd(current.endContainer, current.endOffset);
+                    _this.selectionRange.setStart(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
+                    _this.selectionRange.setEnd(_this.caretRange.endContainer, _this.caretRange.endOffset);
                 }
                 else {
-                    _this.range.setStart(current.endContainer, current.endOffset);
-                    _this.range.setEnd(anchor.startContainer, anchor.startOffset);
+                    _this.selectionRange.setStart(_this.caretRange.endContainer, _this.caretRange.endOffset);
+                    _this.selectionRange.setEnd(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
                 }
-                _this.reselect();
+                _this.redrawSelection();
             });
             this.addEventListener("mouseup", function (e) {
                 isDragSelecting = false;
@@ -68,15 +62,40 @@ var ui;
             document.addEventListener("keypress", function (e) {
                 var c = String.fromCharCode(e.which);
                 // console.log("Key press: " + txt);
-                _this.range.deleteContents();
+                _this.selectionRange.deleteContents();
                 var node = document.createTextNode(c);
-                _this.range.insertNode(node);
-                _this.range.setStart(node, 1);
-                _this.range.setEnd(node, 1);
-                _this.reselect();
+                _this.selectionRange.insertNode(node);
+                _this.selectionRange.setStart(node, 1);
+                _this.caretRange.setEnd(node, 1);
+                _this.caretRange.setStart(node, 1);
+                _this.selectionRange.setEnd(node, 1);
+                _this.redrawSelection();
+                _this.redrawCaret();
             });
         };
-        Code.prototype.reselect = function () {
+        Code.prototype.onResize = function () {
+            this.underlayElem.style.top = this.scrollTop;
+            this.underlayElem.style.left = this.scrollLeft;
+            this.underlayElem.width = this.clientWidth;
+            this.underlayElem.height = this.clientHeight;
+        };
+        Code.prototype.redrawCaret = function () {
+            var rects = this.caretRange.getClientRects();
+            if (rects.length > 0) {
+                var rect = rects[0];
+                var cRect = this.underlayElem.getBoundingClientRect();
+                this.caretElem.style.top = rect.top - cRect.top;
+                this.caretElem.style.left = rect.left - cRect.left - 1;
+                this.caretElem.style.height = rect.height;
+                this.caretElem.style.width = 2;
+            }
+        };
+        Code.prototype.redrawSelection = function () {
+            this.onResize();
+            this.context.clearRect(0, 0, this.underlayElem.width, this.underlayElem.height);
+            if (this.selectionRange.collapsed) {
+                return;
+            }
             var lines = [];
             function readLines(elem) {
                 for (var i = 0; i < elem.childNodes.length; i++) {
@@ -94,18 +113,17 @@ var ui;
             var lineRange = document.createRange();
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
-                if (this.range.intersectsNode(line)) {
+                if (this.selectionRange.intersectsNode(line)) {
                     console.log("Intersects: " + line);
                     lineRange.setStartBefore(line.firstChild);
                     lineRange.setEndAfter(line.lastChild);
-                    if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.range) < 0) {
-                        lineRange.setStart(this.range.startContainer, this.range.startOffset);
+                    if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.selectionRange) < 0) {
+                        lineRange.setStart(this.selectionRange.startContainer, this.selectionRange.startOffset);
                     }
-                    if (lineRange.compareBoundaryPoints(Range.END_TO_END, this.range) > 0) {
-                        lineRange.setEnd(this.range.endContainer, this.range.endOffset);
+                    if (lineRange.compareBoundaryPoints(Range.END_TO_END, this.selectionRange) > 0) {
+                        lineRange.setEnd(this.selectionRange.endContainer, this.selectionRange.endOffset);
                     }
                     var ranges = lineRange.getClientRects();
-                    console.dir(ranges);
                     var lineRect = {
                         left: ranges[0].left + 1,
                         top: ranges[0].top,
@@ -117,12 +135,10 @@ var ui;
                     lineRects.push(lineRect);
                 }
             }
-            // this.context.fillStyle = "#DDDDDD";
-            this.context.clearRect(0, 0, this.underlay.width, this.underlay.height);
             this.context.strokeStyle = "#002266";
             this.context.lineWidth = 1;
             this.context.fillStyle = "#AACCEE";
-            var cRect = this.underlay.getBoundingClientRect();
+            var cRect = this.underlayElem.getBoundingClientRect();
             for (var i = 0; i < lineRects.length; i++) {
                 var rect = lineRects[i];
                 this.context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
@@ -131,18 +147,6 @@ var ui;
                 var rect = lineRects[i];
                 this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
             }
-            /*
-            var cRect = underlay.getBoundingClientRect();
-            
-            var rects = range.getClientRects();
-            context.clearRect(0, 0, underlay.width, underlay.height);
-            context.strokeStyle = "red";
-            
-            for (var i = 0; i < rects.length; i++) {
-              var rect = rects[i];
-              context.strokeRect(Math.floor(rect.left) - 0.5 - cRect.left, Math.floor(rect.top) - 0.5 - cRect.top, Math.ceil(rect.width), Math.ceil(rect.height));
-            }
-            */
         };
         Code.document = document.currentScript.ownerDocument;
         Code = __decorate([
