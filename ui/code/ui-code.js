@@ -1,10 +1,9 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-if (typeof __decorate !== "function") __decorate = function (decorators, target, key, desc) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
     switch (arguments.length) {
         case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
@@ -71,6 +70,7 @@ var ui;
                 _this.selectionRange.setEnd(node, 1);
                 _this.redrawSelection();
                 _this.redrawCaret();
+                e.preventDefault();
             });
         };
         Code.prototype.onResize = function () {
@@ -78,14 +78,15 @@ var ui;
             this.underlayElem.style.left = this.scrollLeft;
             this.underlayElem.width = this.clientWidth;
             this.underlayElem.height = this.clientHeight;
+            this.redrawCaret();
         };
         Code.prototype.redrawCaret = function () {
             var rects = this.caretRange.getClientRects();
             if (rects.length > 0) {
                 var rect = rects[0];
                 var cRect = this.underlayElem.getBoundingClientRect();
-                this.caretElem.style.top = rect.top - cRect.top;
-                this.caretElem.style.left = rect.left - cRect.left - 1;
+                this.caretElem.style.top = rect.top - cRect.top + this.scrollTop;
+                this.caretElem.style.left = rect.left - cRect.left;
                 this.caretElem.style.height = rect.height;
                 this.caretElem.style.width = 2;
             }
@@ -124,29 +125,124 @@ var ui;
                         lineRange.setEnd(this.selectionRange.endContainer, this.selectionRange.endOffset);
                     }
                     var ranges = lineRange.getClientRects();
+                    if (ranges.length == 1) {
+                        console.log("left: " + ranges[0].left + " " + ranges[ranges.length - 1].right);
+                    }
+                    var left = ranges[0].left + 1;
+                    var top = ranges[0].top;
+                    var right = Math.max(left, ranges[ranges.length - 1].right);
+                    var bottom = Math.max(top, ranges[ranges.length - 1].bottom - 1);
+                    var width = right - left;
+                    var height = bottom - top;
                     var lineRect = {
-                        left: ranges[0].left + 1,
-                        top: ranges[0].top,
-                        right: ranges[ranges.length - 1].right,
-                        bottom: ranges[ranges.length - 1].bottom - 1
+                        left: left,
+                        top: top,
+                        right: right,
+                        bottom: bottom,
+                        width: width,
+                        height: height
                     };
-                    lineRect.width = lineRect.right - lineRect.left;
-                    lineRect.height = lineRect.bottom - lineRect.top;
                     lineRects.push(lineRect);
                 }
             }
             this.context.strokeStyle = "#002266";
             this.context.lineWidth = 1;
             this.context.fillStyle = "#AACCEE";
+            if (lineRects.length == 0) {
+                return;
+            }
             var cRect = this.underlayElem.getBoundingClientRect();
+            /*
+            var rad = 4.5;
+            
+            this.context.beginPath();
+            
+            var rect = lineRects[0];
+            var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
+            var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
+            var right = Math.ceil(left + rect.width) + 0.5;
+            var bottom = Math.ceil(top + rect.height) + 0.5;
+            
+            var r = Math.min(rad, Math.abs(right - left));
+            this.context.moveTo(left, top + r);
+            this.context.arc(left + r, top + r, r, Math.PI, -1/2 * Math.PI, false);
+            this.context.arc(right - r, top + r, r, -1/2 * Math.PI, 0, false);
+            var x = right;
+            
+            for (var i = 1; i < lineRects.length; i++) {
+              var rect = lineRects[i];
+              
+              var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
+              var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
+              var right = Math.ceil(left + rect.width) + 0.5;
+              var bottom = Math.ceil(top + rect.height) + 0.5;
+               
+              var r = Math.min(rad, Math.abs(right - x) / 2);
+              if (right > x) {
+                this.context.arc(x + r, top - r, r, Math.PI, 1/2 * Math.PI, true);
+                this.context.arc(right - r, top + r, r, -1/2 * Math.PI, 0, false);
+              } else {
+                this.context.arc(x - r, top - r, r, 0, 1/2 * Math.PI, false);
+                this.context.arc(right + r, top + r, r,-1/2 * Math.PI, Math.PI, true);
+              }
+              
+              x = right;
+            }
+            
+            var rect = lineRects[lineRects.length - 1];
+            
+            var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
+            var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
+            var right = Math.ceil(left + rect.width) + 0.5;
+            var bottom = Math.ceil(top + rect.height) + 0.5;
+            
+            var r = Math.min(rad, Math.abs(right - left));
+            
+            this.context.arc(right - r, bottom - r, r, 0, 1/2 * Math.PI, false);
+            this.context.arc(left + r, bottom - r, r, 1/2 * Math.PI, Math.PI, false);
+            
+            this.context.closePath();
+            this.context.fill();
+            this.context.stroke();
+            */
+            var leftPoints = [];
+            var rightPoints = [];
             for (var i = 0; i < lineRects.length; i++) {
                 var rect = lineRects[i];
-                this.context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
+                var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
+                var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
+                var right = Math.ceil(left + rect.width) + 0.5;
+                var bottom = Math.ceil(top + rect.height) + 0.5;
+                // TODO: If left or right edges equal, just extend the last point...
+                leftPoints.push({ x: left, y: top });
+                leftPoints.push({ x: left, y: bottom });
+                rightPoints.push({ x: right, y: top });
+                rightPoints.push({ x: right, y: bottom });
             }
+            this.context.beginPath();
+            this.context.moveTo(rightPoints[0].x, rightPoints[0].y);
+            for (var i = 1; i < rightPoints.length; i++) {
+                var point = rightPoints[i];
+                this.context.lineTo(point.x, point.y);
+            }
+            for (var i = leftPoints.length - 1; i >= 0; i--) {
+                var point = leftPoints[i];
+                this.context.lineTo(point.x, point.y);
+            }
+            this.context.closePath();
+            this.context.fill();
+            this.context.stroke();
+            /*
             for (var i = 0; i < lineRects.length; i++) {
-                var rect = lineRects[i];
-                this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
+              var rect = lineRects[i];
+              this.context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
             }
+            
+            for (var i = 0; i < lineRects.length; i++) {
+              var rect = lineRects[i];
+              this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
+            }
+            */
         };
         Code.document = document.currentScript.ownerDocument;
         Code = __decorate([
