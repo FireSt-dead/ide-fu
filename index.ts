@@ -6,20 +6,24 @@ var tsserv = require("./services/ts-lang");
 try {
 	var txt = "";
 	var traverse = function(basePath: string) {
-		fs.readdirSync(basePath).forEach(file => {
-			var currentPath = path.resolve(basePath, file);
-			txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
-			if (fs.statSync(currentPath).isDirectory()) {
-				txt += " collapsed=\"true\">";
-				traverse(currentPath);
-			} else {
-				txt += " extension=\"" + path.extname(file) + "\""
-				txt += ">";
-			}
-			txt += "</ui-node>";
-		});
+		try {
+			fs.readdirSync(basePath).forEach(file => {
+				var currentPath = path.resolve(basePath, file);
+				txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
+				if (fs.statSync(currentPath).isDirectory()) {
+					txt += " collapsed=\"true\">";
+					traverse(currentPath);
+				} else {
+					txt += " extension=\"" + path.extname(file) + "\""
+					txt += ">";
+				}
+				txt += "</ui-node>";
+			});
+		} catch(e) {
+			alert(e.toString());
+		}
 	}
-	traverse("./");
+	traverse("D:\\GitHub\\FireSt-dead\\ide-fu");
 	setTimeout(() => {
 		document.getElementById("proj").innerHTML = txt;
 	}, 1);
