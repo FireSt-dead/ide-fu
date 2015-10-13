@@ -25,7 +25,9 @@ module ui {
       
       var isDragSelecting = false;
       
-      this.addEventListener("scroll", e => this.onResize());
+      this.addEventListener("scroll", e => {
+        this.redrawSelection();
+      });
       this.addEventListener("resize", e => this.onResize());
       
       this.addEventListener("mousedown", e => {
@@ -98,7 +100,6 @@ module ui {
     }
       
     redrawSelection() {
-      
         this.onResize();
         this.context.clearRect(0, 0, this.underlayElem.width, this.underlayElem.height);
         
@@ -162,17 +163,12 @@ module ui {
           }
         }
         
-        this.context.strokeStyle = "#002266";
-        this.context.lineWidth = 1;
-        this.context.fillStyle = "#AACCEE";
-        
         if (lineRects.length == 0) {
           return;
         }
         
         var cRect = this.underlayElem.getBoundingClientRect();
-        
-        /*
+
         var rad = 4.5;
         
         this.context.beginPath();
@@ -201,7 +197,7 @@ module ui {
           if (right > x) {
             this.context.arc(x + r, top - r, r, Math.PI, 1/2 * Math.PI, true);
             this.context.arc(right - r, top + r, r, -1/2 * Math.PI, 0, false);
-          } else {
+          } else if (right < x) {
             this.context.arc(x - r, top - r, r, 0, 1/2 * Math.PI, false);
             this.context.arc(right + r, top + r, r,-1/2 * Math.PI, Math.PI, true);
           }
@@ -221,11 +217,39 @@ module ui {
         this.context.arc(right - r, bottom - r, r, 0, 1/2 * Math.PI, false);
         this.context.arc(left + r, bottom - r, r, 1/2 * Math.PI, Math.PI, false);
         
+        x = left;
+        
+        for (var i = lineRects.length - 2; i >= 0; i--) {
+          var rect = lineRects[i];
+          
+          var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
+          var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
+          var right = Math.ceil(left + rect.width) + 0.5;
+          var bottom = Math.ceil(top + rect.height) + 0.5;
+          
+          var r = Math.min(rad, Math.abs(left - x) / 2);
+          
+          if (left > x) {
+            this.context.arc(x + r, bottom + r, r, Math.PI, -1/2 * Math.PI, false);
+            this.context.arc(left - r, bottom - r, r, 1/2 * Math.PI, 0, true)
+          } else if (left < x) {
+            this.context.arc(x - r, bottom + r, r, 0, -1/2 * Math.PI, true);
+            this.context.arc(left + r, bottom - r, r, 1/2 * Math.PI, Math.PI, false);
+          }
+          
+          x = left;
+        }
+        
+        // this.context.strokeStyle = "#002266";
+        this.context.strokeStyle = "#99BBDD";
+        this.context.lineWidth = 1;
+        this.context.fillStyle = "#AACCEE";
+        
         this.context.closePath();
         this.context.fill();
         this.context.stroke();
-        */
 
+        /*
         var leftPoints = [];
         var rightPoints = [];
         for (var i = 0; i < lineRects.length; i++) {
@@ -255,17 +279,6 @@ module ui {
         this.context.closePath();
         this.context.fill();
         this.context.stroke();
-        
-        /*
-        for (var i = 0; i < lineRects.length; i++) {
-          var rect = lineRects[i];
-          this.context.strokeRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
-        }
-        
-        for (var i = 0; i < lineRects.length; i++) {
-          var rect = lineRects[i];
-          this.context.fillRect(Math.floor(rect.left) - Math.floor(cRect.left), Math.floor(rect.top) - Math.floor(cRect.top), Math.ceil(rect.width), Math.ceil(rect.height));
-        }
         */
       }
   }
