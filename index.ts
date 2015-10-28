@@ -3,33 +3,39 @@ import path = require("path");
 
 var tsserv = require("./services/ts-lang");
 
-try {
-	var txt = "";
-	var traverse = function(basePath: string) {
-		try {
-			fs.readdirSync(basePath).forEach(file => {
-				var currentPath = path.resolve(basePath, file);
-				txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
-				if (fs.statSync(currentPath).isDirectory()) {
-					txt += " collapsed=\"true\">";
-					traverse(currentPath);
-				} else {
-					txt += " extension=\"" + path.extname(file) + "\""
-					txt += ">";
-				}
-				txt += "</ui-node>";
-			});
-		} catch(e) {
-			alert(e.toString());
+function loadProject(p: string) {
+	try {
+		var txt = "";
+		var traverse = function(basePath: string) {
+			try {
+				fs.readdirSync(basePath).forEach(file => {
+					var currentPath = path.resolve(basePath, file);
+					txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
+					if (fs.statSync(currentPath).isDirectory()) {
+						txt += " collapsed=\"true\">";
+						traverse(currentPath);
+					} else {
+						txt += " extension=\"" + path.extname(file) + "\""
+						txt += ">";
+					}
+					txt += "</ui-node>";
+				});
+			} catch (e) {
+				alert(e.toString());
+			}
 		}
+		traverse(p);
+		setTimeout(() => {
+			document.getElementById("proj").innerHTML = txt;
+		}, 1);
+	} catch (e) {
+		alert(e.toString());
 	}
-	traverse("D:\\GitHub\\FireSt-dead\\ide-fu");
-	setTimeout(() => {
-		document.getElementById("proj").innerHTML = txt;
-	}, 1);
-} catch(e) {
-	alert(e.toString());
 }
+loadProject("D:\\GitHub\\FireSt-dead\\ide-fu");
+
+window.ondragover = function(e) { e.preventDefault(); return false };
+window.ondrop = function(e) { e.preventDefault(); return false };
 
 document.addEventListener("DOMContentLoaded", (e: any) => {
 	// alert("Load! " + document.getElementById("proj"));
@@ -46,6 +52,24 @@ document.addEventListener("DOMContentLoaded", (e: any) => {
 		// applyTextFormat(editor, content);
 		tsserv.createTsView(editor, content, document);
 	});
+
+	var holder = document.getElementById('body');
+	holder.ondragover = e => false;
+	holder.ondragleave = e => false;
+	holder.ondrop = e => {
+		e.preventDefault();
+		alert("Drop: " + e.dataTransfer.files[0].path);
+		
+		if (e.dataTransfer.files.length === 1) {
+			var p = e.dataTransfer.files[0].path;
+			if (fs.lstatSync(p).isDirectory()) {
+				// alert("Open project at: " + path);
+				loadProject(p);
+			}
+		}
+		
+		return false;
+	};
 });
 
 // Formatters
@@ -54,7 +78,7 @@ function applyTextFormat(host: Element, text: string) {
 		var lElem = document.createElement("ui-line");
 		lElem.setAttribute("num", index);
 		lElem.textContent = line;
-		host.appendChild(lElem); 
+		host.appendChild(lElem);
 	});
 }
 
@@ -72,16 +96,13 @@ function component(name: string) {
 
 function parentOfType(node: Node, type: any) {
 	var element = node;
-	while(element && !(element instanceof type)) {
+	while (element && !(element instanceof type)) {
 		element = element.parentNode;
 	}
 	return element;
 }
 
 // Some random UI drop:
-
-
-
 var resizerProto = Object.create(HTMLElement.prototype);
 resizerProto.createdCallback = function() {
 	var element = this;

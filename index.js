@@ -1,36 +1,41 @@
 var fs = require("fs");
 var path = require("path");
 var tsserv = require("./services/ts-lang");
-try {
-    var txt = "";
-    var traverse = function (basePath) {
-        try {
-            fs.readdirSync(basePath).forEach(function (file) {
-                var currentPath = path.resolve(basePath, file);
-                txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
-                if (fs.statSync(currentPath).isDirectory()) {
-                    txt += " collapsed=\"true\">";
-                    traverse(currentPath);
-                }
-                else {
-                    txt += " extension=\"" + path.extname(file) + "\"";
-                    txt += ">";
-                }
-                txt += "</ui-node>";
-            });
-        }
-        catch (e) {
-            alert(e.toString());
-        }
-    };
-    traverse("D:\\GitHub\\FireSt-dead\\ide-fu");
-    setTimeout(function () {
-        document.getElementById("proj").innerHTML = txt;
-    }, 1);
+function loadProject(p) {
+    try {
+        var txt = "";
+        var traverse = function (basePath) {
+            try {
+                fs.readdirSync(basePath).forEach(function (file) {
+                    var currentPath = path.resolve(basePath, file);
+                    txt += "<ui-node title=\"" + file + "\" file=\"" + currentPath + "\"";
+                    if (fs.statSync(currentPath).isDirectory()) {
+                        txt += " collapsed=\"true\">";
+                        traverse(currentPath);
+                    }
+                    else {
+                        txt += " extension=\"" + path.extname(file) + "\"";
+                        txt += ">";
+                    }
+                    txt += "</ui-node>";
+                });
+            }
+            catch (e) {
+                alert(e.toString());
+            }
+        };
+        traverse(p);
+        setTimeout(function () {
+            document.getElementById("proj").innerHTML = txt;
+        }, 1);
+    }
+    catch (e) {
+        alert(e.toString());
+    }
 }
-catch (e) {
-    alert(e.toString());
-}
+loadProject("D:\\GitHub\\FireSt-dead\\ide-fu");
+window.ondragover = function (e) { e.preventDefault(); return false; };
+window.ondrop = function (e) { e.preventDefault(); return false; };
 document.addEventListener("DOMContentLoaded", function (e) {
     // alert("Load! " + document.getElementById("proj"));
     var proj = document.getElementById("proj");
@@ -44,6 +49,21 @@ document.addEventListener("DOMContentLoaded", function (e) {
         // applyTextFormat(editor, content);
         tsserv.createTsView(editor, content, document);
     });
+    var holder = document.getElementById('body');
+    holder.ondragover = function (e) { return false; };
+    holder.ondragleave = function (e) { return false; };
+    holder.ondrop = function (e) {
+        e.preventDefault();
+        alert("Drop: " + e.dataTransfer.files[0].path);
+        if (e.dataTransfer.files.length === 1) {
+            var p = e.dataTransfer.files[0].path;
+            if (fs.lstatSync(p).isDirectory()) {
+                // alert("Open project at: " + path);
+                loadProject(p);
+            }
+        }
+        return false;
+    };
 });
 // Formatters
 function applyTextFormat(host, text) {
