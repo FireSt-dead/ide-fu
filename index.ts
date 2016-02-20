@@ -1,6 +1,15 @@
 import fs = require("fs");
 import path = require("path");
 
+var gui = require('nw.gui');
+console.log("Args: " + gui.App.argv);
+
+var projectPath;
+if (gui.App.argv.length >= 1) {
+    projectPath = path.resolve(gui.App.argv[0]);
+} else {
+    projectPath = process.cwd();
+}
 var tsserv = require("./services/ts-lang");
 
 function loadProject(p: string) {
@@ -32,7 +41,7 @@ function loadProject(p: string) {
 		alert(e.toString());
 	}
 }
-loadProject("D:\\GitHub\\FireSt-dead\\ide-fu");
+loadProject(projectPath);
 
 window.ondragover = function(e) { e.preventDefault(); return false };
 window.ondrop = function(e) { e.preventDefault(); return false };

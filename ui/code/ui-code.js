@@ -32,7 +32,7 @@ var ui;
             this.addEventListener("scroll", function (e) {
                 _this.redrawSelection();
             });
-            this.addEventListener("resize", function (e) { return _this.onResize(); });
+            this.addEventListener("resize", function (e) { return _this.resizeUnderlay(); });
             this.addEventListener("mousedown", function (e) {
                 _this.anchorRange = _this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
                 _this.redrawCaret();
@@ -61,21 +61,25 @@ var ui;
                 isDragSelecting = false;
             });
             document.addEventListener("keypress", function (e) {
-                var c = String.fromCharCode(e.which);
-                // console.log("Key press: " + txt);
-                _this.selectionRange.deleteContents();
-                var node = document.createTextNode(c);
-                _this.selectionRange.insertNode(node);
-                _this.selectionRange.setStart(node, 1);
-                _this.caretRange.setEnd(node, 1);
-                _this.caretRange.setStart(node, 1);
-                _this.selectionRange.setEnd(node, 1);
+                if (e.key === 8 /* backspace */) {
+                }
+                else {
+                    var c = String.fromCharCode(e.which);
+                    _this.selectionRange.deleteContents();
+                    var node = document.createTextNode(c);
+                    _this.selectionRange.insertNode(node);
+                    _this.selectionRange.setStart(node, 1);
+                    _this.caretRange.setEnd(node, 1);
+                    _this.caretRange.setStart(node, 1);
+                    _this.selectionRange.setEnd(node, 1);
+                }
                 _this.redrawSelection();
                 _this.redrawCaret();
                 e.preventDefault();
+                return false;
             });
         };
-        Code.prototype.onResize = function () {
+        Code.prototype.resizeUnderlay = function () {
             this.underlayElem.style.top = this.scrollTop;
             this.underlayElem.style.left = this.scrollLeft;
             this.underlayElem.width = this.clientWidth;
@@ -94,7 +98,7 @@ var ui;
             }
         };
         Code.prototype.redrawSelection = function () {
-            this.onResize();
+            this.resizeUnderlay();
             this.context.clearRect(0, 0, this.underlayElem.width, this.underlayElem.height);
             if (this.selectionRange.collapsed) {
                 return;
@@ -117,7 +121,6 @@ var ui;
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
                 if (this.selectionRange.intersectsNode(line)) {
-                    console.log("Intersects: " + line);
                     lineRange.setStartBefore(line.firstChild);
                     lineRange.setEndAfter(line.lastChild);
                     if (lineRange.compareBoundaryPoints(Range.START_TO_START, this.selectionRange) < 0) {
@@ -127,9 +130,6 @@ var ui;
                         lineRange.setEnd(this.selectionRange.endContainer, this.selectionRange.endOffset);
                     }
                     var ranges = lineRange.getClientRects();
-                    if (ranges.length == 1) {
-                        console.log("left: " + ranges[0].left + " " + ranges[ranges.length - 1].right);
-                    }
                     var left = ranges[0].left + 1;
                     var top = ranges[0].top;
                     var right = Math.max(left, ranges[ranges.length - 1].right);
@@ -206,44 +206,12 @@ var ui;
                 }
                 x = left;
             }
-            // this.context.strokeStyle = "#002266";
             this.context.strokeStyle = "#99BBDD";
             this.context.lineWidth = 1;
             this.context.fillStyle = "#AACCEE";
             this.context.closePath();
             this.context.fill();
             this.context.stroke();
-            /*
-            var leftPoints = [];
-            var rightPoints = [];
-            for (var i = 0; i < lineRects.length; i++) {
-              var rect = lineRects[i];
-              var left = Math.floor(rect.left) - Math.floor(cRect.left) - 0.5;
-              var top = Math.floor(rect.top) - Math.floor(cRect.top) - 0.5;
-              var right = Math.ceil(left + rect.width) + 0.5;
-              var bottom = Math.ceil(top + rect.height) + 0.5;
-              // TODO: If left or right edges equal, just extend the last point...
-              leftPoints.push({ x: left, y: top });
-              leftPoints.push({ x: left, y: bottom });
-              rightPoints.push({ x: right, y: top });
-              rightPoints.push({ x: right, y: bottom });
-            }
-            
-            this.context.beginPath();
-            
-            this.context.moveTo(rightPoints[0].x, rightPoints[0].y);
-            for (var i = 1; i < rightPoints.length; i++) {
-              var point = rightPoints[i];
-              this.context.lineTo(point.x, point.y);
-            }
-            for (var i = leftPoints.length - 1; i >= 0; i--) {
-              var point = leftPoints[i];
-              this.context.lineTo(point.x, point.y);
-            }
-            this.context.closePath();
-            this.context.fill();
-            this.context.stroke();
-            */
         };
         Code.document = document.currentScript.ownerDocument;
         Code = __decorate([

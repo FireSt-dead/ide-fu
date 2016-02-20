@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "main": "index.html",
   "window": {
-    "toolbar": false,
     "frame": false,
     "position": "center",
     "width": 1200,
@@ -21,5 +20,8 @@
   },
   "scripts": {
     "start": "nw"
+  },
+  "bin": {
+    "idefu": "bin/idefu.js"
   }
 }
