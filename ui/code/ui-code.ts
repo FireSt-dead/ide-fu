@@ -1,4 +1,14 @@
 module ui {
+    
+  interface LineRect {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  }
+          
   @component("ui-code")
   class Code extends HTMLElement {
     static document: Document = document.currentScript.ownerDocument;
@@ -7,13 +17,13 @@ module ui {
     context: any;
     caretElem: any;
 
-    selectionRange: any;
-    caretRange: any;
-    anchorRange: any;
+    selectionRange: Range;
+    caretRange: Range;
+    anchorRange: Range;
 
     createdCallback() {
       var root = this.createShadowRoot();
-      var template = Code.document.getElementById("ui-code");
+      var template = <Template>Code.document.getElementById("ui-code");
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
 
@@ -64,7 +74,7 @@ module ui {
       });
 
       document.addEventListener("keypress", e => {
-        if (e.key === 8 /* backspace */) {
+        if (e.key == "8" /* backspace */) {
           
         } else {
           var c = String.fromCharCode(e.which);
@@ -111,8 +121,8 @@ module ui {
         return;
       }
 
-      var lines = [];
-      function readLines(elem: Element) {
+      var lines = new Array<Line>();
+      function readLines(elem: Node) {
         for (var i = 0; i < elem.childNodes.length; i++) {
           var child = elem.childNodes[i];
           if (child instanceof Line) {
@@ -124,7 +134,7 @@ module ui {
       }
       readLines(this);
 
-      var lineRects = [];
+      var lineRects = new Array<LineRect>();
       var lineRange = document.createRange();
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
@@ -254,7 +264,7 @@ module ui {
     static document: Document = document.currentScript.ownerDocument;
     createdCallback() {
       var root = this.createShadowRoot();
-      var template = Block.document.getElementById("ui-block");
+      var template = <Template>Block.document.getElementById("ui-block");
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
 
@@ -264,19 +274,19 @@ module ui {
         if (this.getAttribute('collapsed')) {
           this.removeAttribute('collapsed');
         } else {
-          this.setAttribute('collapsed', true);
+          this.setAttribute('collapsed', true.toString());
         }
         e.stopPropagation();
       });
 
       expanderElement.addEventListener("mouseenter", e => {
-        var tree = parentOfType(this, Code);
-        tree.setAttribute("collapsing", true);
-        this.setAttribute("collapsing", true);
+        var tree = <Element>parentOfType(this, Code);
+        tree.setAttribute("collapsing", true.toString());
+        this.setAttribute("collapsing", true.toString());
       });
 
       expanderElement.addEventListener("mouseleave", e => {
-        var tree = parentOfType(this, Code);
+        var tree = <Element>parentOfType(this, Code);
         tree.removeAttribute("collapsing");
         this.removeAttribute("collapsing");
       });
@@ -288,19 +298,19 @@ module ui {
     static document: Document = document.currentScript.ownerDocument;
     createdCallback(): void {
       var root = this.createShadowRoot();
-      var template = Line.document.getElementById("ui-line");
+      var template = <Template>Line.document.getElementById("ui-line");
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
 
       // Apply template:
       var num = this.getAttribute('num');
-      var numElement = root.querySelector('#num');
+      var numElement = <HTMLElement>root.querySelector('#num');
       numElement.innerHTML = num;
     }
 
     attributeChangedCallback(name: string, oldValue: any, newValue: any): void {
       if (name === "num") {
-        var numElement = this.shadowRoot.querySelector('#num');
+        var numElement = <HTMLElement>this.shadowRoot.querySelector('#num');
         numElement.innerHTML = newValue;
       }
     }

@@ -10,6 +10,9 @@
     },
     "typescript/typescript.d.ts": {
       "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "node-webkit/node-webkit.d.ts": {
+      "commit": "95b7178e0ef33b4b88327676418b4cc3ad61df0f"
     }
   }
 }

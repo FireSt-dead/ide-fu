@@ -5,7 +5,7 @@ module ui {
 		private _selectedNode: Element;
 		get selectedNode() { return this._selectedNode; }
 		createdCallback() {
-			var t = Tree.document.getElementById('ui-tree');
+			var t = <Template>Tree.document.getElementById('ui-tree');
 			var clone = document.importNode(t.content, true);
 			var shadow = this.createShadowRoot();
 			shadow.appendChild(clone);		
@@ -16,7 +16,7 @@ module ui {
 			}
 			this._selectedNode = node;
 			if (node) {
-				node.setAttribute("selected", true);
+				node.setAttribute("selected", true.toString());
 			}
 			
 			var event = new Event("selection");
@@ -28,14 +28,14 @@ module ui {
 	class Node extends HTMLElement {
 		static document: Document = document.currentScript.ownerDocument;
 		createdCallback() {
-			var t = Node.document.getElementById('ui-node');
+			var t = <Template>Node.document.getElementById('ui-node');
 			var clone = document.importNode(t.content, true);
 			var shadow = this.createShadowRoot();
 			shadow.appendChild(clone);
 		
 			// Apply template:
 			var title = this.getAttribute('title');
-			var titleElement = shadow.querySelector('#title');
+			var titleElement = <HTMLElement>shadow.querySelector('#title');
 			titleElement.innerHTML = title;
 			
 			// depth
@@ -47,7 +47,7 @@ module ui {
 				}
 				parent = parent.parentNode;
 			}
-			var headElement = shadow.querySelector("#head");
+			var headElement = <HTMLElement>shadow.querySelector("#head");
 			headElement.style.padding = "0px 0px 0px " + (depth * 20) + "px";
 			
 			headElement.addEventListener("click", (e) => {
@@ -56,10 +56,10 @@ module ui {
 					if (this.getAttribute('collapsed')) {
 						this.removeAttribute('collapsed');
 					} else {
-						this.setAttribute('collapsed', true);
+						this.setAttribute('collapsed', true.toString());
 					}
 				} else {
-					var tree = this;
+					var tree: any = this;
 					while(tree) {
 						if (tree instanceof Tree) {
 							tree.select(this);

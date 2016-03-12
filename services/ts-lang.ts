@@ -91,12 +91,12 @@ function watch(rootFileNames: string[], options: ts.CompilerOptions) {
         });
     }
     
-    exports.createTsView = function(host, content: string, document: any) {
+    exports.createTsView = function(host: HTMLElement, content: string, document: any) {
         // function createClassifier(host: Logger): Classifier;
         var lines: string[] = content.split("\n");
-        var classifier = ts.createClassifier({ log: s => console.log("Log: " + s) });
+        var classifier = ts.createClassifier(); // { log: s => console.log("Log: " + s) }
 
-        var finalLexState = ts.EndOfLineState.Start;
+        var finalLexState = ts.EndOfLineState.None;
         lines.forEach((line, index) => {
             var result = classifier.getClassificationsForLine(line, finalLexState, true);
             finalLexState = result.finalLexState;

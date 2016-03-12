@@ -75,8 +75,8 @@ function watch(rootFileNames, options) {
     exports.createTsView = function (host, content, document) {
         // function createClassifier(host: Logger): Classifier;
         var lines = content.split("\n");
-        var classifier = ts.createClassifier({ log: function (s) { return console.log("Log: " + s); } });
-        var finalLexState = 0 /* Start */;
+        var classifier = ts.createClassifier(); // { log: s => console.log("Log: " + s) }
+        var finalLexState = 0 /* None */;
         lines.forEach(function (line, index) {
             var result = classifier.getClassificationsForLine(line, finalLexState, true);
             finalLexState = result.finalLexState;

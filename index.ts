@@ -1,10 +1,31 @@
 import fs = require("fs");
 import path = require("path");
 
+require("./ui/core");
+
+/**
+ * Register the class as custom web element.
+ */
+function component(name: string): ClassDecorator {
+	return (target: any) => {
+		document.registerElement(name, { prototype: target.prototype });
+		return target;
+	}
+}
+
+// UI
+function parentOfType(node: Node, type: any): Node {
+	var element = node;
+	while (element && !(element instanceof type)) {
+		element = element.parentNode;
+	}
+	return element;
+}
+
 var gui = require('nw.gui');
 console.log("Args: " + gui.App.argv);
 
-var projectPath;
+var projectPath: string;
 if (gui.App.argv.length >= 1) {
     projectPath = path.resolve(gui.App.argv[0]);
 } else {
@@ -30,7 +51,7 @@ function loadProject(p: string) {
 					txt += "</ui-node>";
 				});
 			} catch (e) {
-				alert(e.toString());
+				// alert(e.toString());
 			}
 		}
 		traverse(p);
@@ -67,13 +88,13 @@ document.addEventListener("DOMContentLoaded", (e: any) => {
 	holder.ondragleave = e => false;
 	holder.ondrop = e => {
 		e.preventDefault();
-		alert("Drop: " + e.dataTransfer.files[0].path);
+        var file = e.dataTransfer.files[0];
+        var filePath:string = (<any>file).path;
+		alert("Drop: " + filePath);
 		
 		if (e.dataTransfer.files.length === 1) {
-			var p = e.dataTransfer.files[0].path;
-			if (fs.lstatSync(p).isDirectory()) {
-				// alert("Open project at: " + path);
-				loadProject(p);
+			if (fs.lstatSync(filePath).isDirectory()) {
+				loadProject(filePath);
 			}
 		}
 		
@@ -85,30 +106,10 @@ document.addEventListener("DOMContentLoaded", (e: any) => {
 function applyTextFormat(host: Element, text: string) {
 	text.split("\n").forEach((line, index) => {
 		var lElem = document.createElement("ui-line");
-		lElem.setAttribute("num", index);
+		lElem.setAttribute("num", index.toString());
 		lElem.textContent = line;
 		host.appendChild(lElem);
 	});
-}
-
-// UI
-
-/**
- * Register the class as custom web element.
- */
-function component(name: string) {
-	return (target: any) => {
-		document.registerElement(name, { prototype: target.prototype });
-		return target;
-	}
-}
-
-function parentOfType(node: Node, type: any) {
-	var element = node;
-	while (element && !(element instanceof type)) {
-		element = element.parentNode;
-	}
-	return element;
 }
 
 // Some random UI drop:

@@ -61,7 +61,7 @@ var ui;
                 isDragSelecting = false;
             });
             document.addEventListener("keypress", function (e) {
-                if (e.key === 8 /* backspace */) {
+                if (e.key == "8" /* backspace */) {
                 }
                 else {
                     var c = String.fromCharCode(e.which);
@@ -103,7 +103,7 @@ var ui;
             if (this.selectionRange.collapsed) {
                 return;
             }
-            var lines = [];
+            var lines = new Array();
             function readLines(elem) {
                 for (var i = 0; i < elem.childNodes.length; i++) {
                     var child = elem.childNodes[i];
@@ -116,7 +116,7 @@ var ui;
                 }
             }
             readLines(this);
-            var lineRects = [];
+            var lineRects = new Array();
             var lineRange = document.createRange();
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
@@ -237,14 +237,14 @@ var ui;
                     _this.removeAttribute('collapsed');
                 }
                 else {
-                    _this.setAttribute('collapsed', true);
+                    _this.setAttribute('collapsed', true.toString());
                 }
                 e.stopPropagation();
             });
             expanderElement.addEventListener("mouseenter", function (e) {
                 var tree = parentOfType(_this, Code);
-                tree.setAttribute("collapsing", true);
-                _this.setAttribute("collapsing", true);
+                tree.setAttribute("collapsing", true.toString());
+                _this.setAttribute("collapsing", true.toString());
             });
             expanderElement.addEventListener("mouseleave", function (e) {
                 var tree = parentOfType(_this, Code);

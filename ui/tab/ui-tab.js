@@ -31,7 +31,7 @@ var ui;
                     child.removeAttribute("selected");
                 }
             }
-            item.setAttribute("selected", true);
+            item.setAttribute("selected", true.toString());
         };
         TabBar.document = document.currentScript.ownerDocument;
         TabBar = __decorate([

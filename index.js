@@ -1,5 +1,23 @@
 var fs = require("fs");
 var path = require("path");
+require("./ui/core");
+/**
+ * Register the class as custom web element.
+ */
+function component(name) {
+    return function (target) {
+        document.registerElement(name, { prototype: target.prototype });
+        return target;
+    };
+}
+// UI
+function parentOfType(node, type) {
+    var element = node;
+    while (element && !(element instanceof type)) {
+        element = element.parentNode;
+    }
+    return element;
+}
 var gui = require('nw.gui');
 console.log("Args: " + gui.App.argv);
 var projectPath;
@@ -30,7 +48,6 @@ function loadProject(p) {
                 });
             }
             catch (e) {
-                alert(e.toString());
             }
         };
         traverse(p);
@@ -63,12 +80,12 @@ document.addEventListener("DOMContentLoaded", function (e) {
     holder.ondragleave = function (e) { return false; };
     holder.ondrop = function (e) {
         e.preventDefault();
-        alert("Drop: " + e.dataTransfer.files[0].path);
+        var file = e.dataTransfer.files[0];
+        var filePath = file.path;
+        alert("Drop: " + filePath);
         if (e.dataTransfer.files.length === 1) {
-            var p = e.dataTransfer.files[0].path;
-            if (fs.lstatSync(p).isDirectory()) {
-                // alert("Open project at: " + path);
-                loadProject(p);
+            if (fs.lstatSync(filePath).isDirectory()) {
+                loadProject(filePath);
             }
         }
         return false;
@@ -78,27 +95,10 @@ document.addEventListener("DOMContentLoaded", function (e) {
 function applyTextFormat(host, text) {
     text.split("\n").forEach(function (line, index) {
         var lElem = document.createElement("ui-line");
-        lElem.setAttribute("num", index);
+        lElem.setAttribute("num", index.toString());
         lElem.textContent = line;
         host.appendChild(lElem);
     });
-}
-// UI
-/**
- * Register the class as custom web element.
- */
-function component(name) {
-    return function (target) {
-        document.registerElement(name, { prototype: target.prototype });
-        return target;
-    };
-}
-function parentOfType(node, type) {
-    var element = node;
-    while (element && !(element instanceof type)) {
-        element = element.parentNode;
-    }
-    return element;
 }
 // Some random UI drop:
 var resizerProto = Object.create(HTMLElement.prototype);

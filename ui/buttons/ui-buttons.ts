@@ -1,11 +1,10 @@
-
 module ui {
   @component("ui-button")
   class Button extends HTMLElement {
     static document: Document = document.currentScript.ownerDocument;
     createdCallback() {
       var root = this.createShadowRoot();
-      var template = Button.document.querySelector('#ui-button');
+      var template = <Template>Button.document.querySelector('#ui-button');
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
     }
@@ -16,7 +15,7 @@ module ui {
     static document: Document = document.currentScript.ownerDocument;
     createdCallback() {
       var root = this.createShadowRoot();
-      var template = CheckBox.document.querySelector('#ui-check-box');
+      var template = <Template>CheckBox.document.querySelector('#ui-check-box');
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
       
@@ -42,7 +41,7 @@ module ui {
     static document: Document = document.currentScript.ownerDocument;
     createdCallback() {
       var root = this.createShadowRoot();
-      var template = RadioButton.document.querySelector('#ui-radio-button');
+      var template = <Template>RadioButton.document.querySelector('#ui-radio-button');
       var clone = document.importNode(template.content, true);
       root.appendChild(clone);
       

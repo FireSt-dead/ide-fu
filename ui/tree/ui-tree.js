@@ -35,7 +35,7 @@ var ui;
             }
             this._selectedNode = node;
             if (node) {
-                node.setAttribute("selected", true);
+                node.setAttribute("selected", true.toString());
             }
             var event = new Event("selection");
             this.dispatchEvent(event);
@@ -79,7 +79,7 @@ var ui;
                         _this.removeAttribute('collapsed');
                     }
                     else {
-                        _this.setAttribute('collapsed', true);
+                        _this.setAttribute('collapsed', true.toString());
                     }
                 }
                 else {

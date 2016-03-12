@@ -1,20 +1,22 @@
 {
     "compilerOptions": {
-        "target": "ES5",
+        "target": "es5",
         "module": "commonjs",
         "sourceMap": true,
-        "noLib": true,
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "noLib": true
     },
     "ide": {
         "compileOnSave": true
     },
     "files": [
-        "node_modules/typescript/bin/lib.core.d.ts",
-        "chrome.d.ts",
+        "typings/tsd.d.ts",
+
+        "node_modules/typescript/lib/lib.d.ts",
+        "node_modules/typescript/lib/typescript.d.ts",
         
-        "typings/node/node.d.ts",
-        "typings/typescript/typescript.d.ts",
+        "chrome.d.ts",
         
         "index.ts",
         "ui/window/ui-window.ts",
