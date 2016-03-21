@@ -19,7 +19,6 @@ var ui;
             _super.apply(this, arguments);
         }
         Code.prototype.createdCallback = function () {
-            var _this = this;
             var root = this.createShadowRoot();
             var template = Code.document.getElementById("ui-code");
             var clone = document.importNode(template.content, true);
@@ -28,56 +27,62 @@ var ui;
             this.context = this.underlayElem.getContext('2d');
             this.caretElem = this.shadowRoot.getElementById("caret");
             this.selectionRange = document.createRange();
-            var isDragSelecting = false;
-            this.addEventListener("scroll", function (e) {
-                _this.redrawSelection();
-            });
-            this.addEventListener("resize", function (e) { return _this.resizeUnderlay(); });
-            this.addEventListener("mousedown", function (e) {
-                _this.anchorRange = _this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
-                _this.redrawCaret();
-                _this.selectionRange.setStart(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
-                _this.selectionRange.setEnd(_this.anchorRange.endContainer, _this.anchorRange.endOffset);
-                isDragSelecting = true;
-                _this.redrawSelection();
-            });
-            this.addEventListener("mousemove", function (e) {
-                if (!isDragSelecting)
-                    return;
-                _this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
-                _this.redrawCaret();
-                var cmp = _this.anchorRange.compareBoundaryPoints(Range.START_TO_START, _this.caretRange);
-                if (cmp <= 0) {
-                    _this.selectionRange.setStart(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
-                    _this.selectionRange.setEnd(_this.caretRange.endContainer, _this.caretRange.endOffset);
-                }
-                else {
-                    _this.selectionRange.setStart(_this.caretRange.endContainer, _this.caretRange.endOffset);
-                    _this.selectionRange.setEnd(_this.anchorRange.startContainer, _this.anchorRange.startOffset);
-                }
-                _this.redrawSelection();
-            });
-            this.addEventListener("mouseup", function (e) {
-                isDragSelecting = false;
-            });
-            document.addEventListener("keypress", function (e) {
-                if (e.key == "8" /* backspace */) {
-                }
-                else {
-                    var c = String.fromCharCode(e.which);
-                    _this.selectionRange.deleteContents();
-                    var node = document.createTextNode(c);
-                    _this.selectionRange.insertNode(node);
-                    _this.selectionRange.setStart(node, 1);
-                    _this.caretRange.setEnd(node, 1);
-                    _this.caretRange.setStart(node, 1);
-                    _this.selectionRange.setEnd(node, 1);
-                }
-                _this.redrawSelection();
-                _this.redrawCaret();
-                e.preventDefault();
-                return false;
-            });
+            this.isDragSelecting = false;
+            // TODO: Create separate methods for scroll and resize and invalidate redraws there.
+            this.addEventListener("scroll", this.redrawSelection.bind(this));
+            this.addEventListener("resize", this.resizeUnderlay.bind(this));
+            this.addEventListener("mousedown", this.mousedown.bind(this));
+            this.addEventListener("mousemove", this.mousemove.bind(this));
+            this.addEventListener("mouseup", this.mouseup.bind(this));
+            document.addEventListener("keypress", this.keypress.bind(this));
+        };
+        Code.prototype.mousedown = function (e) {
+            this.anchorRange = this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+            this.redrawCaret();
+            this.selectionRange.setStart(this.anchorRange.startContainer, this.anchorRange.startOffset);
+            this.selectionRange.setEnd(this.anchorRange.endContainer, this.anchorRange.endOffset);
+            this.isDragSelecting = true;
+            this.redrawSelection();
+        };
+        Code.prototype.mousemove = function (e) {
+            if (!this.isDragSelecting)
+                return;
+            this.caretRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+            this.redrawCaret();
+            var cmp = this.anchorRange.compareBoundaryPoints(Range.START_TO_START, this.caretRange);
+            if (cmp <= 0) {
+                this.selectionRange.setStart(this.anchorRange.startContainer, this.anchorRange.startOffset);
+                this.selectionRange.setEnd(this.caretRange.endContainer, this.caretRange.endOffset);
+            }
+            else {
+                this.selectionRange.setStart(this.caretRange.endContainer, this.caretRange.endOffset);
+                this.selectionRange.setEnd(this.anchorRange.startContainer, this.anchorRange.startOffset);
+            }
+            this.redrawSelection();
+        };
+        Code.prototype.mouseup = function (e) {
+            this.isDragSelecting = false;
+        };
+        Code.prototype.keypress = function (e) {
+            console.log("Tap! " + e);
+            if (e.key == "8" /* backspace */) {
+            }
+            else {
+                var c = String.fromCharCode(e.which);
+                // TODO: This works only if the selection is within a single line.
+                this.selectionRange.deleteContents();
+                var node = document.createTextNode(c);
+                this.selectionRange.insertNode(node);
+                this.selectionRange.setStart(node, 1);
+                this.caretRange.setEnd(node, 1);
+                this.caretRange.setStart(node, 1);
+                this.selectionRange.setEnd(node, 1);
+            }
+            // TODO: Invalidate using requestAnimationFrame instead of immediate redraw.
+            this.redrawSelection();
+            this.redrawCaret();
+            e.preventDefault();
+            return false;
         };
         Code.prototype.resizeUnderlay = function () {
             this.underlayElem.style.top = this.scrollTop;
