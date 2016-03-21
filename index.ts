@@ -3,6 +3,20 @@ import path = require("path");
 
 require("./ui/core");
 
+function linkUIComponent(path: string) {
+    let link = document.createElement('link');
+    link.rel = 'import';
+    link.href = path + '.html';
+    link.onerror = e => console.log("UI link error: " + e);
+    document.head.appendChild(link);
+}
+
+linkUIComponent("ui/window/ui-window");
+linkUIComponent("ui/buttons/ui-buttons");
+linkUIComponent("ui/tab/ui-tab");
+linkUIComponent("ui/tree/ui-tree");
+linkUIComponent("ui/code/ui-code");
+
 /**
  * Register the class as custom web element.
  */
